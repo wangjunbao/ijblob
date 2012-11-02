@@ -1,14 +1,18 @@
-*Enclosed Area* (A)
+*Enclosed Area* (A):
 The area enclosed by the outer contour of the blob.
 
-*Perimeter* (P)
+*Perimeter* (P):
 The perimeter of outer contur of the blob.
 
-*Perimeter of the convex hull* (H)
+*Perimeter of the convex hull* (H):
 The perimeter of the convex hull of the blob
 
-*Cicularity*
+*Cicularity*:
 Defined as P^2 / A. Has its minimum for a perfect circle by 4*PI
 
-*Thinnes Ratio*
+*Thinnes Ratio*:
 Invers proportional to the circularity. Furthermore it is normed. It is defined as: 4 `*`PI`*`(A/P^2)
+
+Area/Perimeter Ratio: Defined as A/P
+
+Temperatur of the outer contour: Defined as https://dl.dropbox.com/u/560426/imagej/temp.gif
