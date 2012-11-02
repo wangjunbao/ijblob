@@ -1,0 +1,2 @@
+===Enclosed Area===
+The area enclosed by the outer contour of the blob.
