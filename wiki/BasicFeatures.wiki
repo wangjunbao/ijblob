@@ -11,4 +11,4 @@ The perimeter of the convex hull of the blob
 Defined as P^2 / A. Has its minimum for a perfect circle by 4*PI
 
 *Thinnes Ratio*
-Invers proportional to the circularity. Furthermore it is normed between 0 and 1. Defined as: 4*PI*(A/P^2)
+Invers proportional to the circularity. Furthermore it is normed between 0 and 1. Defined as: 4 `*`PI`*`(A/P^2)
