@@ -1,5 +1,4 @@
 
-
 *Enclosed Area* (A):
 The area enclosed by the outer contour of the blob.
 
@@ -21,4 +20,4 @@ Inverse proportional to the circularity. Furthermore it is normed. It is defined
 
 *Fractal Box Dimension*: Estimated fractal dimension by the box count algorithm.
 
-[1] Luciano da Fontoura Costa, Roberto Marcondes Cesar, Jr.Shape Classification and Analysis: Theory and Practice, Second Edition, 2009, CRC Press 
+`[`1`]` Luciano da Fontoura Costa, Roberto Marcondes Cesar, Jr.Shape Classification and Analysis: Theory and Practice, Second Edition, 2009, CRC Press 
