@@ -54,7 +54,6 @@ public class Blob {
 		this.outerContour = outerContour;
 		this.label = label;
 		innerContours = new ArrayList<Polygon>();
-		//calcFirstKFourierDeskriptors(3);
 	}
 	
 	public void draw(ImageProcessor ip, boolean drawHoles){

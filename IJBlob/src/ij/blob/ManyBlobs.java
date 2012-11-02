@@ -32,9 +32,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /*
- * Dieses Plugin filtert binäre Objekte nach ihren Formparametern. Ob die
- * einzelnen Objekte zu identifizieren und deren Kontur zu extrahieren,
- * wurde folgende Algorithmus implementiert: ﻿F. Chang, “A linear-time
+ * This library extracts conncected components . For this purpose it uses the
+ * following algorithm : ﻿F. Chang, “A linear-time
  * component-labeling algorithm using contour tracing technique,” Computer
  * Vision and Image Understanding, vol. 93, no. 2, pp. 206-220, 2004.
  */
