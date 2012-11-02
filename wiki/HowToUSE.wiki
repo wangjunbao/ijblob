@@ -1,0 +1,14 @@
+#summary Easy examples!
+
+=== Extract the Components of an Image and read the perimeter of a blob ===
+{{{
+import ij.blob.*;
+...
+private ManyBlobs allBlobs;
+...
+public void someMethod(ImagePlus imp) {
+  ManyBlobs allBlobs = new ManyBlobs(imp); // Extended ArrayList
+  allBlobs.findConnectedComponents(); // Start the Connected Component Algorithm
+  allBlobs.get(0).getPerimeter(); // Read the perimeter of a Blob
+}
+}}}
