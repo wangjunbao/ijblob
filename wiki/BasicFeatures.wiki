@@ -1,3 +1,5 @@
+
+
 *Enclosed Area* (A):
 The area enclosed by the outer contour of the blob.
 
@@ -11,8 +13,12 @@ The perimeter of the convex hull of the blob
 Defined as P^2 / A. Has its minimum for a perfect circle by 4*PI
 
 *Thinnes Ratio*:
-Invers proportional to the circularity. Furthermore it is normed. It is defined as: 4 `*`PI`*`(A/P^2)
+Inverse proportional to the circularity. Furthermore it is normed. It is defined as: 4 `*`PI`*`(A/P^2)
 
-Area/Perimeter Ratio: Defined as A/P
+*Area/Perimeter Ratio*: Defined as A/P
 
-Temperatur of the outer contour: Defined as https://dl.dropbox.com/u/560426/imagej/temp.gif
+*Temperatur of the outer contour*: Defined as https://dl.dropbox.com/u/560426/imagej/temp.gif. It's has a strong relationship to the fractal dimension. For further information see [1].
+
+*Fractal Box Dimension*: Estimated fractal dimension by the box count algorithm.
+
+[1] Luciano da Fontoura Costa, Roberto Marcondes Cesar, Jr.Shape Classification and Analysis: Theory and Practice, Second Edition, 2009, CRC Press 
