@@ -116,7 +116,9 @@ public class Blob {
 		ip.fill(objectMask);
 	}
 	
-	
+	/**
+	 * @return The outer contour of an object
+	 */
 	public Polygon getOuterContour() {
 		return outerContour;
 	}
@@ -130,6 +132,9 @@ public class Blob {
 		return label;
 	}
 	
+	/**
+	 * @return The perimeter of the outer contour.
+	 */
 	public double getPerimeter() {
 		if(perimeter!=-1){
 			return perimeter;
@@ -139,6 +144,9 @@ public class Blob {
 		return perimeter;
 	}
 	
+	/**
+	 * @return The perimeter of the convex hull
+	 */
 	public double getPerimeterConvexHull() {
 		if(perimeterConvexHull!=-1){
 			return perimeterConvexHull;
@@ -153,13 +161,16 @@ public class Blob {
 		perimeterConvexHull = convexRoi.getLength();
 		}catch(Exception e){
 			perimeterConvexHull = getPerimeter();
-			IJ.log("Blob ID: "+ getLabel() +" Fehler bei der Berechnung des Umfangs der Convexen Hülle. Stattdessen wird der normale Umfang verwendet");
+			IJ.log("Blob ID: "+ getLabel() +" Error calculating the perimeter of the convex hull. Returning the regular perimeter");
 		}
 		
 		
 		return perimeterConvexHull;
 	}
 	
+	/**
+	 * @return The enclosed area of the outer contour (without substracting the holes).
+	 */
 	public double getEnclosedArea() {
 		if(enclosedArea!=-1){
 			return enclosedArea;
@@ -175,6 +186,10 @@ public class Blob {
 		return enclosedArea;
 	}
 	
+	/**
+	 * Calculates the circularity of the outer contour: (perimeter*perimeter) / (enclosed area)
+	 * @return (perimeter*perimeter) / (enclosed area)
+	 */
 	public double getCircularity() {
 		if(circularity!=-1){
 			return circularity;
@@ -185,6 +200,9 @@ public class Blob {
 		return circularity;
 	}
 	
+	/**
+	 * @return Thinnes Ratio defined as: (4*Math.PI)/Circularity
+	 */
 	public double getThinnesRatio() {
 		if(thinnesRatio!=-1){
 			return thinnesRatio;
@@ -193,7 +211,9 @@ public class Blob {
 		thinnesRatio = (thinnesRatio>1)?1:thinnesRatio;
 		return thinnesRatio;
 	}
-	
+	/**
+	 * @return Area to perimeter ratio
+	 */
 	public double getAreaToPerimeterRatio() {
 		if(areaToPerimeterRatio != -1){
 			return areaToPerimeterRatio;
@@ -201,7 +221,10 @@ public class Blob {
 		areaToPerimeterRatio = getEnclosedArea()/getPerimeter();
 		return areaToPerimeterRatio;
 	}
-	
+	/**
+	 * @return Contour temperatur as defined in  Luciano da Fontoura Costa, Roberto Marcondes Cesar,
+	 * Jr.Shape Classification and Analysis: Theory and Practice, Second Edition, 2009, CRC Press 
+	 */
 	public double getContourTemperature() {
 		if(temperature!=-1){
 			return temperature;
@@ -211,10 +234,24 @@ public class Blob {
 		temperature = 1/(Math.log((2*peri)/(Math.abs(peri-chp)))/Math.log(2));
 		return temperature;
 	}
+	/**
+	 * @return Calculates the fractal box dimension of the blob.
+	 * @param boxSizes ordered array of Box-Sizes
+	 */
+	public double getFractalBoxDimension(int[] boxSizes) {
+		FractalBoxCounterBlob boxcounter = new FractalBoxCounterBlob();
+		boxcounter.setBoxSizes(boxSizes);
+		fractalBoxDimension = boxcounter.getFractcalDimension(this);
+		return fractalBoxDimension;
+	}
 	
+	/**
+	 * @return Calculates the fractal box dimension of the blob.
+	 */
 	public double getFractalBoxDimension() {
 		FractalBoxCounterBlob boxcounter = new FractalBoxCounterBlob();
 		fractalBoxDimension = boxcounter.getFractcalDimension(this);
 		return fractalBoxDimension;
 	}
+	
 }

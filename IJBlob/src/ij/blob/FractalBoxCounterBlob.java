@@ -41,10 +41,10 @@ public class FractalBoxCounterBlob {
 	Rectangle roi;
 	int foreground;
 	ImagePlus imp;
-
-	public int setup(String arg, ImagePlus imp) {
-		this.imp = imp;
-		return 0;
+	
+	public FractalBoxCounterBlob() {
+		// TODO Auto-generated constructor stub
+		boxSizes = s2ints(sizes);
 	}
 
 	public double getFractcalDimension(Blob blob) {
@@ -56,12 +56,13 @@ public class FractalBoxCounterBlob {
 		ImageProcessor ip = pf.getMask(r.width, r.height);
 		ip.invert();
 		imp = new ImagePlus("",ip);
-		boxSizes = s2ints(sizes);
+		
 		boxCountSums = new float[boxSizes.length];
 		for (int i=0; i<boxSizes.length; i++)
 			maxBoxSize = Math.max(maxBoxSize, boxSizes[i]);
 		counts = new int[maxBoxSize*maxBoxSize+1];
 		imp.deleteRoi();
+		IJ.log(""+boxSizes[0]+" "+boxSizes[1]);
 		double D = doBoxCounts(ip);
 		return D ;
 	}
@@ -77,6 +78,14 @@ public class FractalBoxCounterBlob {
 			catch (NumberFormatException e) {IJ.log(""+e); return null;}
 		}
 		return ints;
+	}
+	
+	public void setBoxSizes(int[] sizes){
+		boxSizes = sizes;
+	}
+	
+	public void setBoxSizes(String sizes){
+		boxSizes = s2ints(sizes);
 	}
 
 	boolean FindMargins(ImageProcessor ip) {
@@ -166,7 +175,7 @@ public class FractalBoxCounterBlob {
 		return boxSum;
 	}
 	
-	double plot() {
+	double getSlope() {
 		int n = boxSizes.length;
 		float[] sizes = new float[boxSizes.length];
 		for (int i=0; i<n; i++)
@@ -175,23 +184,6 @@ public class FractalBoxCounterBlob {
 		cf.doFit(CurveFitter.STRAIGHT_LINE);
 		double[] p = cf.getParams();
 		double D = -p[1];
-		float[] px = new float[100];
-		float[] py = new float[100];
-		double[] a = Tools.getMinMax(sizes);
-		double xmin=a[0], xmax=a[1]; 
-		a = Tools.getMinMax(boxCountSums);
-		double ymin=a[0], ymax=a[1]; 
-		double inc = (xmax-xmin)/99.0;
-		double tmp = xmin;
-		for (int i=0; i<100; i++) {
-			px[i]=(float)tmp;
-			tmp += inc;
-		}
-		for (int i=0; i<100; i++)
-			py[i] = (float)cf.f(p, px[i]);
-		a = Tools.getMinMax(py);
-		ymin = Math.min(ymin, a[0]);
-		ymax = Math.max(ymax, a[1]);
 		return D;			
 	}
 
@@ -204,7 +196,7 @@ public class FractalBoxCounterBlob {
 
 			boxCountSums[i] = (float)Math.log(boxSum);
 		}
-		double D = plot();;
+		double D = getSlope();;
 		imp.deleteRoi();
 		return D;
 	}

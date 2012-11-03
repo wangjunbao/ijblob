@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /*
- * This library extracts conncected components . For this purpose it uses the
+ * This library extracts connected components . For this purpose it uses the
  * following algorithm : ﻿F. Chang, “A linear-time
  * component-labeling algorithm using contour tracing technique,” Computer
  * Vision and Image Understanding, vol. 93, no. 2, pp. 206-220, 2004.
@@ -40,6 +40,10 @@ import java.util.Arrays;
 
 public class ManyBlobs extends ArrayList<Blob> {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private ImagePlus imp;
 	private ImageProcessor labledImage;
 	private int labelCount = 1;
@@ -58,6 +62,7 @@ public class ManyBlobs extends ArrayList<Blob> {
 	
 	public ManyBlobs(ImagePlus imp) {
 		setImage(imp);
+		
 	}
 	
 	private void setImage(ImagePlus imp) {
@@ -66,17 +71,18 @@ public class ManyBlobs extends ArrayList<Blob> {
 		if (stats.histogram[0] + stats.histogram[255] != stats.pixelCount) {
 			throw new java.lang.IllegalArgumentException("Not a binary image");
 		}
+		
+		if(imp.isInvertedLut()){
+			BACKGROUND = 0;
+			OBJECT = 255;
+		}
+		
 		addWhiteBorder(imp);
 		labledImage = new ColorProcessor(this.imp.getWidth(),
 				this.imp.getHeight());
 	}
 	
 	
-	/**
-	 * Prüft, ob eine weißer Rand vorhanden ist, und fügt ansonsten einen hinzu.
-	 * @param img
-	 *            Das Bild, welches einen Rand hinzugefügt bekommen soll.
-	 */
 	private void addWhiteBorder(ImagePlus img) {
 		boolean hasWhiteBorder = true;
 		ImageProcessor oldip = img.getProcessor();
@@ -108,8 +114,12 @@ public class ManyBlobs extends ArrayList<Blob> {
 		}
 
 		if (!hasWhiteBorder) {
+			int fill = NewImage.FILL_WHITE;
+			if(BACKGROUND==0){
+				fill = NewImage.FILL_BLACK;
+			}
 			imp = NewImage.createByteImage("", img.getWidth() + 2,
-					img.getHeight() + 2, 1, NewImage.FILL_WHITE);
+					img.getHeight() + 2, 1, fill);
 			ImageProcessor ip = imp.getProcessor();
 
 			ByteProcessor newproc = (ByteProcessor) ip;
@@ -144,9 +154,6 @@ public class ManyBlobs extends ArrayList<Blob> {
 			for (int j = roi.x; j < roi.x + roi.width; ++j) {
 				value = pixels[offset + j] & 255;
 				if (value == OBJECT) {
-					if (j == 2 && i == 1) {
-						IJ.log("");
-					}
 					if (isNewExternalContour(j, i, proc) && hasNoLabel(j, i)) {
 
 						labledImage.set(j, i, labelCount);
