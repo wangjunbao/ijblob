@@ -60,9 +60,11 @@ public class ManyBlobs extends ArrayList<Blob> {
 	 */
 	int iterationorder[] = { 5, 4, 3, 6, 2, 7, 0, 1 };
 	
+	/**
+	 * @param imp Binary Image
+	 */
 	public ManyBlobs(ImagePlus imp) {
-		setImage(imp);
-		
+		setImage(imp);		
 	}
 	
 	private void setImage(ImagePlus imp) {
@@ -140,6 +142,7 @@ public class ManyBlobs extends ArrayList<Blob> {
 	}
 	/**
 	 * Start the Connected Component Algorithm
+	 * @see  ﻿F. Chang, “A linear-time component-labeling algorithm using contour tracing technique,” Computer Vision and Image Understanding, vol. 93, no. 2, pp. 206-220, 2004.
 	 */
 	public void findConnectedComponents() {
 		ImageProcessor ip = imp.getProcessor();

@@ -23,6 +23,8 @@ import ij.gui.Roi;
 import ij.process.ImageProcessor;
 import ij.process.PolygonFiller;
 
+import java.awt.Color;
+import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -39,6 +41,7 @@ public class Blob {
 	private int label;
 	
 	//Features
+	private Point  centerOfGrafity = null;
 	private double perimeter = -1;
 	private double perimeterConvexHull = -1;
 	private double enclosedArea = -1;
@@ -48,6 +51,7 @@ public class Blob {
 	private double areaToPerimeterRatio = -1;
 	private double temperature = -1;
 	private double fractalBoxDimension = -1;
+	private double fractalDimensionGoodness = -1;
 
 
 	public Blob(Polygon outerContour, int label) {
@@ -56,6 +60,11 @@ public class Blob {
 		innerContours = new ArrayList<Polygon>();
 	}
 	
+	/**
+	 * Draws the Blob with or without its holes.
+	 * @param ip The ImageProcesser in which the blob has to be drawn.
+	 * @param drawHoles Draw the holes of the blob (true/false)
+	 */
 	public void draw(ImageProcessor ip, boolean drawHoles){
 		fillPolygon(ip, outerContour, gray_object);
 		if(drawHoles){
@@ -63,6 +72,43 @@ public class Blob {
 				fillPolygon(ip, innerContours.get(i), gray_background);
 			}
 		}
+	}
+	
+	/**
+	 * Draws the Convex Hull of a Blob
+	 * @param ip The ImageProcesser in which the Convex Hull has to be drawn.
+	 */
+	public void drawConvexHull(ImageProcessor ip) {
+		ip.setColor(Color.RED);
+		ip.drawPolygon(getConvexHull());	
+	}
+
+	
+	/**
+	 * Return the geometric center of gravity of the blob. It
+	 * is calculated by the outer contour without consider possible
+	 * holes.
+	 * @return Geometric center of gravity of the blob.
+	 */
+	public Point getCenterOfGravity() {
+		if(centerOfGrafity != null){
+			return centerOfGrafity;
+		}
+		centerOfGrafity = new Point();
+	    
+	    int[] x = outerContour.xpoints;
+	    int[] y = outerContour.ypoints;
+	    int sumx = 0;
+	    int sumy = 0;
+	    for(int i = 0; i < outerContour.npoints-1; i++){
+	    	int cross = (x[i]*y[i+1]-x[i+1]*y[i]);
+	    	sumx = sumx + (x[i]+x[i+1])*cross;
+	    	sumy = sumy + (y[i]+y[i+1])*cross;
+	    }
+	    centerOfGrafity.x = (int)(sumx/(6*getEnclosedArea()));
+	    centerOfGrafity.y = (int)(sumy/(6*getEnclosedArea()));
+		return centerOfGrafity;
+		
 	}
 	
 	/**
@@ -123,6 +169,10 @@ public class Blob {
 		return outerContour;
 	}
 	
+	/**
+	 * Adds an inner contour (hole) to blob.
+	 * @param contour Contour of the hole.
+	 */
 	public void addInnerContour(Polygon contour) {
 		innerContours.add(contour);
 	}
@@ -153,8 +203,7 @@ public class Blob {
 		}
 		PolygonRoi convexRoi = null;
 		
-		PolygonRoi roi = new PolygonRoi(outerContour, Roi.POLYGON);
-		Polygon hull = roi.getConvexHull();
+		Polygon hull = getConvexHull();
 		perimeterConvexHull = 0;
 		try {
 		convexRoi = new PolygonRoi(hull, Roi.POLYGON);
@@ -166,6 +215,19 @@ public class Blob {
 		
 		
 		return perimeterConvexHull;
+	}
+	
+	/**
+	 * Returns the convex hull of the blob.
+	 * @return The convex hull as polygon
+	 */
+	public Polygon getConvexHull() {
+		PolygonRoi roi = new PolygonRoi(outerContour, Roi.POLYGON);
+		Polygon hull = roi.getConvexHull();
+		if(hull==null){
+			return getOuterContour();
+		}
+		return hull;
 	}
 	
 	/**
@@ -222,7 +284,8 @@ public class Blob {
 		return areaToPerimeterRatio;
 	}
 	/**
-	 * @return Contour temperatur as defined in  Luciano da Fontoura Costa, Roberto Marcondes Cesar,
+	 * @return Contour Temperatur (normed). It has a strong relationship to the fractal dimension.
+	 * @see Datails in Luciano da Fontoura Costa, Roberto Marcondes Cesar,
 	 * Jr.Shape Classification and Analysis: Theory and Practice, Second Edition, 2009, CRC Press 
 	 */
 	public double getContourTemperature() {
@@ -239,19 +302,41 @@ public class Blob {
 	 * @param boxSizes ordered array of Box-Sizes
 	 */
 	public double getFractalBoxDimension(int[] boxSizes) {
+		if(fractalBoxDimension !=-1){
+			return fractalBoxDimension;
+		}
 		FractalBoxCounterBlob boxcounter = new FractalBoxCounterBlob();
 		boxcounter.setBoxSizes(boxSizes);
-		fractalBoxDimension = boxcounter.getFractcalDimension(this);
+		double[] FDandGOF = boxcounter.getFractcalDimension(this);
+		fractalBoxDimension = FDandGOF[0];
+		fractalDimensionGoodness = FDandGOF[1];
 		return fractalBoxDimension;
 	}
 	
 	/**
-	 * @return Calculates the fractal box dimension of the blob.
+	 * @return The fractal box dimension of the blob.
 	 */
 	public double getFractalBoxDimension() {
+		if(fractalBoxDimension !=-1){
+			return fractalBoxDimension;
+		}
 		FractalBoxCounterBlob boxcounter = new FractalBoxCounterBlob();
-		fractalBoxDimension = boxcounter.getFractcalDimension(this);
+		double[] FDandGOF  = boxcounter.getFractcalDimension(this);
+		fractalBoxDimension = FDandGOF[0];
+		fractalDimensionGoodness = FDandGOF[1];
 		return fractalBoxDimension;
 	}
 	
+	/**
+	 * @return The goodness of the "best fit" line of the fractal box dimension estimation.
+	 */
+	public double getFractalDimensionGoodness(){
+		return fractalDimensionGoodness;
+	}
+	/**
+	 * @return The number of inner contours (Holes) of a blob.
+	 */
+	public int getNumberofHoles() {
+		return innerContours.size();
+	}
 }

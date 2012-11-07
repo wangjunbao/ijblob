@@ -46,14 +46,18 @@ public class FractalBoxCounterBlob {
 		// TODO Auto-generated constructor stub
 		boxSizes = s2ints(sizes);
 	}
-
-	public double getFractcalDimension(Blob blob) {
+	/**
+	 * 
+	 * @param blob The for which the fractal dimension have to determined
+	 * @return An 2 element array. [0] = Fractal Dimension, [1] = Goodness of Fit
+	 */
+	public double[] getFractcalDimension(Blob blob) {
 		Polygon p = blob.getOuterContour();
 		PolygonRoi proi = new PolygonRoi(p, PolygonRoi.FREEROI);
 		Rectangle r = proi.getBounds();
-		PolygonFiller pf = new PolygonFiller();
-		pf.setPolygon(proi.getXCoordinates(), proi.getYCoordinates(), proi.getNCoordinates());
-		ImageProcessor ip = pf.getMask(r.width, r.height);
+		ImagePlus help = NewImage.createByteImage("", r.width, r.height, 1, NewImage.FILL_BLACK);
+		ImageProcessor ip = help.getProcessor();
+		blob.draw(ip, true);
 		ip.invert();
 		imp = new ImagePlus("",ip);
 		
@@ -62,9 +66,8 @@ public class FractalBoxCounterBlob {
 			maxBoxSize = Math.max(maxBoxSize, boxSizes[i]);
 		counts = new int[maxBoxSize*maxBoxSize+1];
 		imp.deleteRoi();
-		IJ.log(""+boxSizes[0]+" "+boxSizes[1]);
-		double D = doBoxCounts(ip);
-		return D ;
+		double[] FDandGOF = doBoxCounts(ip);
+		return FDandGOF;
 	}
 
 	/** Breaks the specified string into an array
@@ -175,28 +178,31 @@ public class FractalBoxCounterBlob {
 		return boxSum;
 	}
 	
-	double getSlope() {
+	double[] getSlopeAndGoodnessOfFit() {
 		int n = boxSizes.length;
 		float[] sizes = new float[boxSizes.length];
 		for (int i=0; i<n; i++)
 			sizes[i] = (float)Math.log(boxSizes[i]);
 		CurveFitter cf = new CurveFitter(Tools.toDouble(sizes), Tools.toDouble(boxCountSums));
 		cf.doFit(CurveFitter.STRAIGHT_LINE);
+		
 		double[] p = cf.getParams();
-		double D = -p[1];
-		return D;			
+		double[] slopeandrsquared = new double[2];
+		slopeandrsquared[0] = -p[1];
+		slopeandrsquared[1] = cf.getFitGoodness();
+		return slopeandrsquared;			
 	}
 
-	double doBoxCounts(ImageProcessor ip) {
+	double[] doBoxCounts(ImageProcessor ip) {
 		if (!FindMargins(ip))
-			return -1;
+			return null;
 
 		for (int i=0; i<boxSizes.length; i++) {
 			int boxSum = count(boxSizes[i], ip);
 
 			boxCountSums[i] = (float)Math.log(boxSum);
 		}
-		double D = getSlope();;
+		double[] D = getSlopeAndGoodnessOfFit();
 		imp.deleteRoi();
 		return D;
 	}
