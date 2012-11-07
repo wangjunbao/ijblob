@@ -20,6 +20,7 @@ I also add the bold line to the target in plugins build xml:
 <zipgroupfileset dir="${lib.dir}" includes="**/*.jar" /> <!-- THE ADDED LINE-->
 ...
 }}}
+This adds the IJBLob.jar to the Plugin JAR-File.
 
 == Example 1: Extract the Blobs of an Image and Read the Perimeter of a Blob ==
 {{{
