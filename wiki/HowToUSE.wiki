@@ -1,6 +1,6 @@
-#summary Easy examples!
+#summary Examples and Tutorials
 
-=== Extract the Blobs of an Image and Read the Perimeter of a Blob ===
+== Extract the Blobs of an Image and Read the Perimeter of a Blob ==
 {{{
 import ij.blob.*;
 ...
