@@ -28,7 +28,7 @@ Furtheremore I add the marked line to the target in plugins build.xml:
 }}}
 
 == Install the `ShapeFilter` Plugin ==
-Only copy die ShapeFilter_vX.X.X_.jar in your ImageJ Plugin Folder
+Only copy die `ShapeFilter`_vX.X.X_.jar in your ImageJ Plugin Folder
 
 == Example 1: Extract the Blobs of an Image and Read the Perimeter of a Blob ==
 {{{
