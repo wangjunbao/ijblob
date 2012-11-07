@@ -16,7 +16,7 @@ Inverse proportional to the circularity. Furthermore it is normed. It is defined
 
 *Area/Perimeter Ratio*: Defined as A/P
 
-*Temperatur of the outer contour*: Defined as https://dl.dropbox.com/u/560426/imagej/temp.gif. It's has a strong relationship to the fractal dimension. For further information see [1].
+*Temperatur of the outer contour*: Defined as https://dl.dropbox.com/u/560426/imagej/temp.gif. It has a strong relationship to the fractal dimension. For further information see [1].
 
 *Fractal Box Dimension*: Estimated fractal dimension by the box count algorithm. The default Box-Sizes are "2,3,4,6,8,12,16,32,64". For other sizes you can use the method "getFractalBoxDimension(int[] sizes)". Where sizes is an ordered array of the box sizes.
 
