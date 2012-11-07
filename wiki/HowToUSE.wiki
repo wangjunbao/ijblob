@@ -2,7 +2,8 @@
 
 == Use IJBlob for Developing an ImageJ Plugin ==
 I suppose you use Eclipse as IDE. You have to add IJBlob.jar to Librarys in the Java Build Path:
-Project->Properties->Java Build Path->Librarys->Add External JARs.
+
+_Project->Properties->Java Build Path->Librarys->Add External JARs._
 
 Furthermore you have to add the following import line:
 {{{
