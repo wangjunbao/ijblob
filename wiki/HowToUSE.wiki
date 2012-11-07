@@ -14,7 +14,9 @@ Now you are able to use the IJBlob Library (see Example 1).
 
 For deploying a plugin, I also include the IJBlob.jar to the plugin JAR-File. Therefore I saved the IJBlob.jar in the folder "lib" in the plugins root directory and add the following property to the build.xml:
 {{{
+...
 <property name="lib.dir"       value="lib"/>
+...
 }}} 
 
 Furtheremore I add the marked line to the target in plugins build.xml:
