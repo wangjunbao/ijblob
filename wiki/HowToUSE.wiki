@@ -11,9 +11,12 @@ import ij.blob.*;
 
 Now you are able to use the IJBlob Library (see Example 1).
 
-I also add the following line to my build xml:
+I also add the bold line to the target in plugins build xml:
 {{{
-<zipgroupfileset dir="${lib.dir}" includes="**/*.jar" />
+<fileset dir="." includes="plugins.config" />
+<fileset dir="${build}" includes="**/*.*" />
+<fileset dir="${src}" includes="**/*.java"/>
+<zipgroupfileset dir="${lib.dir}" includes="**/*.jar" /> <!-- THE ADDED LINE-->
 }}}
 
 == Example 1: Extract the Blobs of an Image and Read the Perimeter of a Blob ==
