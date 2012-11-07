@@ -12,7 +12,12 @@ import ij.blob.*;
 
 Now you are able to use the IJBlob Library (see Example 1).
 
-I also add the marked line to the target in plugins build xml:
+For deploying a plugin, I also include the IJBlob.jar to the plugin JAR-File. Therefore I saved the IJBlob.jar in the folder "lib" in the plugins root directory and add the following property to the build.xml:
+{{{
+<property name="lib.dir"       value="lib"/>
+}}} 
+
+Furtheremore I add the marked line to the target in plugins build.xml:
 {{{
 ...
 <fileset dir="." includes="plugins.config" />
@@ -21,7 +26,6 @@ I also add the marked line to the target in plugins build xml:
 <zipgroupfileset dir="${lib.dir}" includes="**/*.jar" /> <!-- THE ADDED LINE-->
 ...
 }}}
-This adds the IJBLob.jar to the Plugin JAR-File.
 
 == Install the `ShapeFilter` Plugin ==
 Only copy die ShapeFilter_vX.X.X_.jar in your ImageJ Plugin Folder
