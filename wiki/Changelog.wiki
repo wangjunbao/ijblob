@@ -1,0 +1,19 @@
+=IJBlob=
+==V 1.0.3 07.11.2012==
+  * Add "Center of Gravity" as Basic Feature
+  * Add "Number of Holes" as Basic Feature
+  * Add getter for the Convex Hull
+  * Add Drawing-Function for the Convex-Hull
+
+==V 1.0.2 03.11.2012==
+  * Fractal Box Sizes are now configurable
+  * Adding getter for fractal goodness (R-Squared).
+  * IJBlob works with LUT Inverted Images
+
+=Shape Filter=
+
+==V 1.0.3 07.11.2012==
+  * Add "Center of Gravity" in the Result Table
+  * Add "Number of Holes" as Basic Feature 
+  * Add Drawing-Option: Draw Convex-Hull
+  * Add Drawing-Option: Draw Holes
