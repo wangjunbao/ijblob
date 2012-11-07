@@ -12,7 +12,7 @@ import ij.blob.*;
 
 Now you are able to use the IJBlob Library (see Example 1).
 
-I also add the bold line to the target in plugins build xml:
+I also add the marked line to the target in plugins build xml:
 {{{
 ...
 <fileset dir="." includes="plugins.config" />
