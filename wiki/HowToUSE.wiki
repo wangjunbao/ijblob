@@ -9,7 +9,12 @@ Furthermore you have to add the following import line:
 import ij.blob.*;
 }}}
 
-Now you able to use the IJBlob Library (see Example 1):
+Now you are able to use the IJBlob Library (see Example 1).
+
+I also add the following line to my build xml:
+{{{
+<zipgroupfileset dir="${lib.dir}" includes="**/*.jar" />
+}}}
 
 == Example 1: Extract the Blobs of an Image and Read the Perimeter of a Blob ==
 {{{
