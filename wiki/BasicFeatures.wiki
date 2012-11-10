@@ -1,4 +1,4 @@
-#labels Features
+#labels Features,Featured
 *Enclosed Area* (A):
 The area enclosed by the outer contour of the blob.
 
