@@ -1,4 +1,5 @@
 #summary Examples and Tutorials
+#labels Featured
 
 == Use the IJBlob Library for Developing an ImageJ Plugin ==
 I suppose you use Eclipse as IDE. You have to add IJBlob.jar to Librarys in the Java Build Path:
