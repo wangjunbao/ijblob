@@ -57,7 +57,7 @@ public class FractalBoxCounterBlob {
 		Rectangle r = proi.getBounds();
 		ImagePlus help = NewImage.createByteImage("", r.width, r.height, 1, NewImage.FILL_BLACK);
 		ImageProcessor ip = help.getProcessor();
-		blob.draw(ip, true);
+		blob.draw(ip, Blob.DRAW_HOLES);
 		ip.invert();
 		imp = new ImagePlus("",ip);
 		

@@ -36,6 +36,10 @@ public class Blob {
 	private int gray_background = 255;
 	private int gray_object = 0;
 	
+	public final static int DRAW_HOLES = 1;
+	public final static int DRAW_CONVEX_HULL = 2;
+	public final static int DRAW_LABEL = 4;
+	
 	private Polygon outerContour;
 	private ArrayList<Polygon> innerContours; //Holes
 	private int label;
@@ -52,7 +56,7 @@ public class Blob {
 	private double temperature = -1;
 	private double fractalBoxDimension = -1;
 	private double fractalDimensionGoodness = -1;
-
+    
 
 	public Blob(Polygon outerContour, int label) {
 		this.outerContour = outerContour;
@@ -63,27 +67,39 @@ public class Blob {
 	/**
 	 * Draws the Blob with or without its holes.
 	 * @param ip The ImageProcesser in which the blob has to be drawn.
-	 * @param drawHoles Draw the holes of the blob (true/false)
+	 * @param options Drawing Options are DRAW_HOLES, DRAW_CONVEX_HULL, DRAW_LABEL. Combinations with | are possible.
 	 */
-	public void draw(ImageProcessor ip, boolean drawHoles){
+	public void draw(ImageProcessor ip, int options){
+		ip.setColor(Color.BLACK);
 		fillPolygon(ip, outerContour, gray_object);
-		if(drawHoles){
+		
+		if((options&DRAW_HOLES)>0){
 			for(int i = 0; i < innerContours.size(); i++) {
+				ip.setColor(Color.WHITE);
 				fillPolygon(ip, innerContours.get(i), gray_background);
 			}
+		}
+		
+		if((options&DRAW_CONVEX_HULL)>0){
+			ip.setColor(Color.RED);
+			ip.drawPolygon(getConvexHull());
+		}
+		
+		if((options&DRAW_LABEL)>0){
+			Point cog = getCenterOfGravity();
+			ip.setColor(Color.MAGENTA);
+			ip.drawString(""+getLabel(), cog.x, cog.y);
 		}
 	}
 	
 	/**
-	 * Draws the Convex Hull of a Blob
-	 * @param ip The ImageProcesser in which the Convex Hull has to be drawn.
+	 * Draws the Blob with its holes.
+	 * @param ip The ImageProcesser in which the blob has to be drawn.
 	 */
-	public void drawConvexHull(ImageProcessor ip) {
-		ip.setColor(Color.RED);
-		ip.drawPolygon(getConvexHull());	
+	public void draw(ImageProcessor ip){
+		draw(ip,DRAW_HOLES);
 	}
-
-	
+		
 	/**
 	 * Return the geometric center of gravity of the blob. It
 	 * is calculated by the outer contour without consider possible
@@ -156,7 +172,7 @@ public class Blob {
 		Rectangle r = proi.getBounds();
 		PolygonFiller pf = new PolygonFiller();
 		pf.setPolygon(proi.getXCoordinates(), proi.getYCoordinates(), proi.getNCoordinates());
-		ip.setValue(fillValue);
+		//ip.setValue(fillValue);
 		ip.setRoi(r);
 		ImageProcessor objectMask = pf.getMask(r.width, r.height);
 		ip.fill(objectMask);
@@ -167,6 +183,13 @@ public class Blob {
 	 */
 	public Polygon getOuterContour() {
 		return outerContour;
+	}
+	
+	/**
+	 * @return Arraylist of the inner contours.
+	 */
+	public ArrayList<Polygon> getInnerContours() {
+		return innerContours;
 	}
 	
 	/**
