@@ -20,12 +20,12 @@
 =Shape Filter=
 
 ==V 1.0.4 12.11.2012==
-* More robust with binary images which saved in lossy formats.
-* BugFix: Zero-Line in the result table
-* Small GUI Changes
-* Add Drawing-Option: Draw Label
-* Labels, Convex-Hull etc. are now in color.
-* Add Column "Label" to the Result-Table
+  * More robust with binary images which saved in lossy formats.
+  * BugFix: Zero-Line in the result table
+  * Small GUI Changes
+  * Add Drawing-Option: Draw Label
+  * Labels, Convex-Hull etc. are now in color.
+  * Add Column "Label" to the Result-Table
 
 ==V 1.0.3 07.11.2012==
   * Add "Center of Gravity" in the Result Table
