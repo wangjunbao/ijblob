@@ -20,7 +20,7 @@ For deploying a plugin, I also include the IJBlob.jar to the plugin JAR-File. Th
 ...
 }}} 
 
-Furtheremore I add the marked line to the target in plugins build.xml:
+Furthermore I add the marked line to the target in plugins build.xml:
 {{{
 ...
 <fileset dir="." includes="plugins.config" />
