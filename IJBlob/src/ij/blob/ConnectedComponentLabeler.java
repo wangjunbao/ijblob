@@ -44,7 +44,9 @@ public class ConnectedComponentLabeler {
 		this.imp = imp;
 		this.BACKGROUND = BACKGROUND;
 		this.OBJECT = OBJECT;
+
 		addWhiteBorder(imp);
+
 		labledImage = new ColorProcessor(this.imp.getWidth(), this.imp.getHeight());
 		
 	}
@@ -54,6 +56,7 @@ public class ConnectedComponentLabeler {
 	 * @see  ﻿F. Chang, “A linear-time component-labeling algorithm using contour tracing technique,” Computer Vision and Image Understanding, vol. 93, no. 2, pp. 206-220, 2004.
 	 */
 	public void doConnectedComponents() {
+		
 		ImageProcessor ip = imp.getProcessor();
 
 		ByteProcessor proc = (ByteProcessor) ip;
@@ -67,7 +70,7 @@ public class ConnectedComponentLabeler {
 				value = pixels[offset + j] & 255;
 				if (value == OBJECT) {
 					if (isNewExternalContour(j, i, proc) && hasNoLabel(j, i)) {
-
+						
 						labledImage.set(j, i, labelCount);
 						Polygon outerContour = traceContour(j, i, proc,
 								labelCount, 1);
@@ -76,7 +79,7 @@ public class ConnectedComponentLabeler {
 						++labelCount;
 
 					} else if (isNewInternalContour(j, i, proc)) {
-
+				
 						int label = labledImage.get(j, i);
 						if (hasNoLabel(j, i)) {
 							label = labledImage.get(j - 1, i);
@@ -89,6 +92,7 @@ public class ConnectedComponentLabeler {
 						getBlobByLabel(label).addInnerContour(innerContour);
 
 					} else if (hasNoLabel(j, i)) {
+					
 						int precedinglabel = labledImage.get(j - 1, i);
 						labledImage.set(j, i, precedinglabel);
 					}
@@ -244,6 +248,7 @@ public class ConnectedComponentLabeler {
 		byte[] pixels = (byte[]) oldproc.getPixels();
 		int w = oldproc.getWidth();
 		for (int i = 0; i < oldproc.getHeight(); i++) {
+			
 			int offset = i * w;
 			//Erste und letzte Scanrow
 			if (i == 0 || i == w - 1) {
@@ -263,7 +268,7 @@ public class ConnectedComponentLabeler {
 			}
 
 			if (!hasWhiteBorder) {
-				i = w; // Stop searching
+				i = oldproc.getHeight(); // Stop searching
 			}
 		}
 

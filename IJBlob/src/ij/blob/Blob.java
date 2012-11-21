@@ -104,7 +104,7 @@ public class Blob {
 	 * Return the geometric center of gravity of the blob. It
 	 * is calculated by the outer contour without consider possible
 	 * holes.
-	 * @return Geometric center of gravity of the blob.
+	 * @return Geometric center of gravity of the blob
 	 */
 	public Point getCenterOfGravity() {
 		if(centerOfGrafity != null){
@@ -126,7 +126,24 @@ public class Blob {
 		return centerOfGrafity;
 		
 	}
-	
+	/*
+	 * Moment Definition of "Gorman et. al. Practical Algorithms for Image Analysis"
+	 */
+	public double getMoment(int p, int q) {
+		 int[] x = outerContour.xpoints;
+		 int[] y = outerContour.ypoints;
+		 double moment = 0;
+		 float factor = 1/2;
+		 for(int k = 1; k < outerContour.npoints-1; k++){
+			 if(p==0 && q==0){
+				 moment += y[k]*x[k-1] - x[k]*y[k-1];
+			 }
+			 else if( (p==1&&p==0) || (p==0&&p==1)) {
+				// moment += 
+			 }
+		 }
+		 return factor*moment;
+	}
 	/**
 	 * Calculates the first k Fourier Descriptor
 	 * @param k	Highest Fourier Descriptor
