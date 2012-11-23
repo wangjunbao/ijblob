@@ -1,6 +1,12 @@
 #labels Featured
 =IJBlob=
-==V 1.0.4a 21.11.2012==
+==V 1.0.5 23.11.2012==
+  * Add Blob Feature: Region Based Moments (getMoments)
+  * Add Blob Feature: Central Region Based Moments (getCentralMoments)
+  * Add Blob Feature: Eigenvalue Major Axis (getEigenvalueMajorAxis)
+  * Add Blob Feature: Eigenvalue Minor Axis (getEigenvalueMinorAxis)
+  * Add Blob Feature: Elongation (getElongation)
+  * Add Blob Feature: Orientation (getOrientationMajorAxis/getOrientationMinorAxis)
   * Bug Fix (issue 1)
 
 ==V 1.0.4 12.11.2012==
@@ -21,8 +27,9 @@
 
 =Shape Filter=
 
-==V 1.0.4a 21.11.2012==
+==V 1.0.5 23.11.2012==
   * Bug Fix in IJBlob (issue 1)
+  * Add Feature: Elongation
 
 ==V 1.0.4 12.11.2012==
   * More robust with binary images which saved in lossy formats.
