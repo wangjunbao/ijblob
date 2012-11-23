@@ -25,6 +25,6 @@ Inverse proportional to the circularity. Furthermore it is normed. It is defined
 *Region Based Moments*: Moment of a Region R of order (p+q) is defined as:
 https://dl.dropbox.com/u/560426/imagej/moment.gif where x,y are the coordinates of the pixels insede the region R.
 
-*Central Region Based Moments:"  Moment of a Region R of order (p+q) with the center of gravity (xc,yc) is defined as: https://dl.dropbox.com/u/560426/imagej/centralmoments.gif
+*Central Region Based Moments*:  Moment of a Region R of order (p+q) with the center of gravity (xc,yc) is defined as: https://dl.dropbox.com/u/560426/imagej/centralmoments.gif
 
 `[`1`]` Luciano da Fontoura Costa, Roberto Marcondes Cesar, Jr.Shape Classification and Analysis: Theory and Practice, Second Edition, 2009, CRC Press 
