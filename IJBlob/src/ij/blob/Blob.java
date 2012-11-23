@@ -56,12 +56,15 @@ public class Blob {
 	private double temperature = -1;
 	private double fractalBoxDimension = -1;
 	private double fractalDimensionGoodness = -1;
+	private double[][] centralMomentsLUT = {{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
+	private double[][] momentsLUT = {{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
     
 
 	public Blob(Polygon outerContour, int label) {
 		this.outerContour = outerContour;
 		this.label = label;
 		innerContours = new ArrayList<Polygon>();
+		
 	}
 	
 	/**
@@ -126,24 +129,151 @@ public class Blob {
 		return centerOfGrafity;
 		
 	}
-	/*
-	 * Moment Definition of "Gorman et. al. Practical Algorithms for Image Analysis"
+	/**
+	 * Region-Based Moments Definition of "Gorman et. al. Practical Algorithms for Image Analysis" (p. 157).
+	 * (computational expensive!)
+	 * @return Region-Based Moments of order (p + q)
+	 * @param q (order = (p + q))
+	 * @param p (order = (p + q))
 	 */
 	public double getMoment(int p, int q) {
-		 int[] x = outerContour.xpoints;
-		 int[] y = outerContour.ypoints;
-		 double moment = 0;
-		 float factor = 1/2;
-		 for(int k = 1; k < outerContour.npoints-1; k++){
-			 if(p==0 && q==0){
-				 moment += y[k]*x[k-1] - x[k]*y[k-1];
-			 }
-			 else if( (p==1&&p==0) || (p==0&&p==1)) {
-				// moment += 
+		 if(p<=2 && q<=2){
+			 if(momentsLUT[p][q]!=-1){
+				 return momentsLUT[p][q];
 			 }
 		 }
-		 return factor*moment;
+		 int moment = 0;
+		 Rectangle bounds = outerContour.getBounds();
+		 for(int x = bounds.x; x < bounds.x+bounds.width;x++){
+			 for(int y = bounds.y; y < bounds.y+bounds.height;y++){
+				 if(outerContour.contains(x, y)){
+					 moment += Math.pow(x, p) * Math.pow(y, q);
+				 }
+			 } 
+		 }
+		 momentsLUT[p][q] = moment;
+		 return moment;
 	}
+	
+	/**
+	 * Central Moments Definition of "Gorman et. al. Practical Algorithms for Image Analysis" (p. 158).
+	 * (computational expensive!)
+	 * @return Central Moment of Order (p + q)
+	 * @param q (order = (p + q))
+	 * @param p (order = (p + q))
+	 */
+	public double getCentralMoments(int p, int q){
+		
+		 if(p<=2 && q<=2){
+			 if(centralMomentsLUT[p][q]!=-1){
+				 return centralMomentsLUT[p][q];
+			 }
+		 }
+		
+		double centralMoment = 0;
+		double m00 = getMoment(0,0);
+		double xc = getMoment(1,0)/m00; //Centroid x
+		double yc = getMoment(0,1)/m00; //Centroid y
+		/*
+		if(p==0 && q == 0){
+			centralMoment = m00;
+		}
+		else if(( p==0 && q==1) || ( p==1 && q==0)){
+			centralMoment = 0;
+		}
+		else if(p==1 && q == 1) {
+			centralMoment = (getMoment(1, 1)-getMoment(0,1)*(getMoment(1, 0)/getMoment(0,0)));
+		}
+		else if(p==2 && q==0){
+			centralMoment = (getMoment(2, 0) - getMoment(1, 0)*(getMoment(1, 0)/getMoment(0,0)));
+		}
+		else if(p==0 && q==2){
+			centralMoment = (getMoment(0, 2) - getMoment(0, 1)*(getMoment(0, 1)/getMoment(0,0)));
+		}
+		else
+		{
+		
+			IJ.log("HIER");
+			*/
+			Rectangle bounds = outerContour.getBounds();
+			for(int x = bounds.x; x < bounds.x+bounds.width;x++){
+				for(int y = bounds.y; y < bounds.y+bounds.height;y++){
+					if(outerContour.contains(x, y)){
+						centralMoment += Math.pow(x-xc, p) * Math.pow(y-yc, q);
+					}
+				} 
+			}
+			/*
+		}
+		
+		IJ.log(""+p+","+q+": " + centralMoment);
+		*/
+		centralMomentsLUT[p][q] = centralMoment;
+		return centralMoment;
+	}
+	
+	private double getOrientation(){
+		double c00 = getCentralMoments(0, 0);
+		double c20 = getCentralMoments(2,0)/c00;
+		double c02 = getCentralMoments(0,2)/c00;
+		double c11 = getCentralMoments(1,1)/c00;
+		if(c11==0){
+			IJ.log("First central order moment ist zero. No orientation is calculated. 0 is returned by default");
+		}
+	
+		double tanalpha = 2.0*c11/(c20-c02);
+		return -0.5*Math.atan(tanalpha)*(360.0/(2*Math.PI));
+	}
+	
+	/**
+	 * @return The Orientation of the Major Axis from the Blob in grad (measured counter clockwise from the positive x axis).
+	 */
+	public double getOrientationMajorAxis(){
+		return getOrientation();
+	}
+	
+	/**
+	 * @return The Orientation of the Major Axis from the Blob in grad (measured counter clockwise from the positive x axis).
+	 */
+	public double getOrientationMinorAxis(){
+		return getOrientation()-90;
+	}
+	
+	private double getEigenvalue(boolean major) {
+		double c00 = getCentralMoments(0, 0);
+		double c20 = getCentralMoments(2,0)/c00;
+		double c02 = getCentralMoments(0,2)/c00;
+		double c11 = getCentralMoments(1,1)/c00;
+		
+		int sign = 1;
+		if(!major){
+			sign = -1;
+		}
+		double value = 0.5*(c20+c02)+sign*0.5*Math.sqrt(4*Math.pow(c11, 2)+Math.pow(c20-c02, 2));
+		return value;
+	}
+	
+	/**
+	 * @return Return the Eigenvalue from the major axis (computational expensive!)
+	 */
+	public double getEigenvalueMajorAxis() {
+		return getEigenvalue(true);
+	}
+	
+	/**
+	 * @return Return the Eigenvalue from the minor axis (computational expensive!)
+	 */
+	public double getEigenvalueMinorAxis() {
+		return getEigenvalue(false);
+	}
+	
+	/**
+	 * @return The Elongation of the Blob based on its eigenvalues (computational expensive!)
+	 */
+	public double getElongation() {
+		return Math.sqrt(1-getEigenvalueMinorAxis()/getEigenvalueMajorAxis());
+	}
+	
 	/**
 	 * Calculates the first k Fourier Descriptor
 	 * @param k	Highest Fourier Descriptor

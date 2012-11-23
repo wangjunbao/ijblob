@@ -17,20 +17,9 @@
 */
 
 package ij.blob;
-import ij.IJ;
 import ij.ImagePlus;
-import ij.gui.NewImage;
-import ij.plugin.Thresholder;
-import ij.process.ByteProcessor;
-import ij.process.ColorProcessor;
-import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
-
-import java.awt.Point;
-import java.awt.Polygon;
-import java.awt.Rectangle;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /*
  * This library extracts connected components . For this purpose it uses the
