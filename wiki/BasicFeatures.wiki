@@ -22,4 +22,7 @@ Inverse proportional to the circularity. Furthermore it is normed. It is defined
 
 *Holes*: The number of holes. More specifically, the number of internal contours of a blob.
 
+*Region Based Moments*: Moment of Order (p+q) ist defined as:
+https://dl.dropbox.com/u/560426/imagej/moment.gif
+
 `[`1`]` Luciano da Fontoura Costa, Roberto Marcondes Cesar, Jr.Shape Classification and Analysis: Theory and Practice, Second Edition, 2009, CRC Press 
