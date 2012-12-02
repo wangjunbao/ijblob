@@ -27,6 +27,11 @@
 
 =Shape Filter=
 
+==V 1.0.5a 02.12.2012==
+  * Add Option: Elongation (Computational Expensive) is now "optional".
+  * Bug Fix: Plugin are not callable in Macro-Scripts
+  * Bug Fix: Result-Image is of type RGB, even when no contour or label is not plotted
+
 ==V 1.0.5 23.11.2012==
   * Bug Fix in IJBlob (issue 1)
   * Add Feature: Elongation
