@@ -1,5 +1,12 @@
 Changelog
+==V 1.0.6==
+* BugFix: Drawing-Method draws the outer contour imprecise
+* BugFix: The Area values doesnt consider the contour pixels
 
+
+==V 1.0.5==
+* BugFix: Object Pixel in last Image Row leads to "ArrayIndexOutOfBounds"-Exception
+* BugFix: Result Image is from Type RGB even if there is no color.
 ==V 1.0.4==
 * (Blob.java) Add Drawing-Option for the Labels
 * (Blob.java) Add getter for the inner contours

@@ -268,7 +268,7 @@ public class ConnectedComponentLabeler {
 			
 			int offset = i * w;
 			//Erste und letzte Scanrow
-			if (i == 0 || i == w - 1) {
+			if (i == 0 || i == oldproc.getHeight()-1) {
 
 				for (int j = 0; j < oldproc.getWidth(); j++) {
 					int value = pixels[offset + j] & 255;

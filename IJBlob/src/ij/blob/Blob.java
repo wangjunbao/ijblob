@@ -27,10 +27,10 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
-
 
 public class Blob {
 	private int gray_background = 255;
@@ -56,6 +56,10 @@ public class Blob {
 	private double temperature = -1;
 	private double fractalBoxDimension = -1;
 	private double fractalDimensionGoodness = -1;
+	private double elongation = -1;
+	private double eigenMajor = -1;
+	private double eigenMinor = -1;
+	private double orientation = -1;
 	private double[][] centralMomentsLUT = {{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
 	private double[][] momentsLUT = {{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
     
@@ -74,12 +78,13 @@ public class Blob {
 	 */
 	public void draw(ImageProcessor ip, int options){
 		ip.setColor(Color.BLACK);
-		fillPolygon(ip, outerContour, gray_object);
+		fillPolygon(ip, outerContour, false);
+		
 		
 		if((options&DRAW_HOLES)>0){
 			for(int i = 0; i < innerContours.size(); i++) {
 				ip.setColor(Color.WHITE);
-				fillPolygon(ip, innerContours.get(i), gray_background);
+				fillPolygon(ip, innerContours.get(i), true);
 			}
 		}
 		
@@ -142,16 +147,83 @@ public class Blob {
 				 return momentsLUT[p][q];
 			 }
 		 }
-		 int moment = 0;
-		 Rectangle bounds = outerContour.getBounds();
-		 for(int x = bounds.x; x < bounds.x+bounds.width;x++){
-			 for(int y = bounds.y; y < bounds.y+bounds.height;y++){
-				 if(outerContour.contains(x, y)){
-					 moment += Math.pow(x, p) * Math.pow(y, q);
-				 }
-			 } 
-		 }
+		 double moment = 0;
+		 /*
+		 int[] xp = outerContour.xpoints;
+		 int[] yp = outerContour.ypoints;
+		 boolean fastMethod = false;
+		 double faktor=1;
+		
+		for(int k = 1; k<outerContour.npoints; k++)
+		{
+			
+			 if((p==0) && (q == 0)){
+				 moment = getEnclosedArea();
+				 fastMethod=true;
+				 faktor=1;//0.5;
+			 }
+			 else
+			 {
+				 k=outerContour.npoints;
+			 }
+			
+			 if((p==1) && (q == 0)){
+				 moment += 0.5*(xp[k]+xp[k-1])*(yp[k]*xp[k-1]-xp[k]*yp[k-1])-
+						 1.0/6 * (yp[k]-yp[k-1])*(xp[k]*xp[k]+xp[k]*xp[k-1]+
+								 xp[k-1]*xp[k-1]);
+				 fastMethod = true;
+				 faktor=0.5; 
+			 }
+	
+			 else if((p==0) && (q == 1)){
+				 moment += 0.5*(yp[k]+yp[k-1])*(xp[k]*yp[k-1]-yp[k]*xp[k-1])-
+						 1.0/6 * (xp[k]-xp[k-1])*(yp[k]*yp[k]+yp[k]*yp[k-1]+
+								 yp[k-1]*yp[k-1]);
+				 fastMethod = true;
+				 faktor=0.5; 
+			 }
+			 
+			 else if((p==1) && (q == 1)){
+				 moment += (yp[k]*xp[k-1]-xp[k]*yp[k-1])*(2*xp[k]*yp[k]+xp[k-1]*yp[k]+
+						 xp[k]*yp[k-1]+
+						 2*xp[k-1]*yp[k-1]);
+				 fastMethod = true;
+				 faktor =1.0/24;
+			 }
+
+			 else if((p==2) && (q == 0)){
+				 moment += 0.5*(yp[k]*xp[k-1]-xp[k]*yp[k-1])*(xp[k]*xp[k]+
+						 xp[k]*xp[k-1]+xp[k-1]*xp[k-1])-
+						 0.25*(yp[k]-yp[k-1])*(xp[k]*xp[k]*xp[k]+xp[k]*xp[k]*xp[k-1]+xp[k]*xp[k-1]*xp[k-1]+xp[k-1]*xp[k-1]*xp[k-1]);
+				 fastMethod = true;
+				 faktor =1.0/3;
+			 }
+		
+			 else if((p==0) && (q == 2)){
+				 moment += 0.5*(xp[k]*yp[k-1]-yp[k]*xp[k-1])*(yp[k]*yp[k]+
+						 yp[k]*yp[k-1]+yp[k-1]*yp[k-1])-
+						 0.25*(xp[k]-xp[k-1])*(yp[k]*yp[k]*yp[k]+yp[k]*yp[k]*yp[k-1]+yp[k]*yp[k-1]*yp[k-1]+yp[k-1]*yp[k-1]*yp[k-1]);
+				 fastMethod = true;
+				 faktor =1.0/3;
+			 }
+			
+		}
+		*/
+		 
+		
+		
+	
+		Rectangle bounds = outerContour.getBounds();
+		for(int x = bounds.x; x < bounds.x+bounds.width+1;x++){
+			for(int y = bounds.y; y < bounds.y+bounds.height+1;y++){
+
+				if(outerContour.contains((double)x,(double)y)){
+					moment += Math.pow(x, p) * Math.pow(y, q);
+				}
+			} 
+		}
 		 momentsLUT[p][q] = moment;
+
 		 return moment;
 	}
 	
@@ -174,27 +246,28 @@ public class Blob {
 		double m00 = getMoment(0,0);
 		double xc = getMoment(1,0)/m00; //Centroid x
 		double yc = getMoment(0,1)/m00; //Centroid y
-		/*
+		
 		if(p==0 && q == 0){
 			centralMoment = m00;
 		}
+		
 		else if(( p==0 && q==1) || ( p==1 && q==0)){
 			centralMoment = 0;
 		}
+		
 		else if(p==1 && q == 1) {
-			centralMoment = (getMoment(1, 1)-getMoment(0,1)*(getMoment(1, 0)/getMoment(0,0)));
+			centralMoment = getMoment(1, 1)-yc*getMoment(1, 0);
 		}
+		
 		else if(p==2 && q==0){
-			centralMoment = (getMoment(2, 0) - getMoment(1, 0)*(getMoment(1, 0)/getMoment(0,0)));
+			centralMoment = (getMoment(p, q) - xc*(getMoment(1, 0)));
 		}
+		
 		else if(p==0 && q==2){
-			centralMoment = (getMoment(0, 2) - getMoment(0, 1)*(getMoment(0, 1)/getMoment(0,0)));
+			centralMoment = (getMoment(p, q) - yc*(getMoment(0, 1)));
 		}
 		else
 		{
-		
-			IJ.log("HIER");
-			*/
 			Rectangle bounds = outerContour.getBounds();
 			for(int x = bounds.x; x < bounds.x+bounds.width;x++){
 				for(int y = bounds.y; y < bounds.y+bounds.height;y++){
@@ -203,11 +276,11 @@ public class Blob {
 					}
 				} 
 			}
-			/*
-		}
 		
-		IJ.log(""+p+","+q+": " + centralMoment);
-		*/
+			
+		}
+		//IJ.log(""+p+","+q+": " + centralMoment);
+		//IJ.log("CMOM "+p+","+q+" L" + getLabel() + " :" + centralMoment);
 		centralMomentsLUT[p][q] = centralMoment;
 		return centralMoment;
 	}
@@ -217,26 +290,41 @@ public class Blob {
 		double c20 = getCentralMoments(2,0)/c00;
 		double c02 = getCentralMoments(0,2)/c00;
 		double c11 = getCentralMoments(1,1)/c00;
-		if(c11==0){
-			IJ.log("First central order moment ist zero. No orientation is calculated. 0 is returned by default");
-		}
+		
 	
 		double tanalpha = 2.0*c11/(c20-c02);
-		return -0.5*Math.atan(tanalpha)*(360.0/(2*Math.PI));
+		double grad = -0.5*Math.atan(tanalpha)*(360.0/(2*Math.PI));
+	
+		//Negative Zero or positive zero?
+		if(1/grad == Double.NEGATIVE_INFINITY){
+			return 0;
+		}
+		else if(1/grad == Double.POSITIVE_INFINITY){
+			return 90;
+		}
+		return grad;
 	}
 	
 	/**
 	 * @return The Orientation of the Major Axis from the Blob in grad (measured counter clockwise from the positive x axis).
 	 */
 	public double getOrientationMajorAxis(){
-		return getOrientation();
+		if(orientation!=-1){
+			return orientation;
+		}
+		orientation =getOrientation();
+		return orientation;
 	}
 	
 	/**
 	 * @return The Orientation of the Major Axis from the Blob in grad (measured counter clockwise from the positive x axis).
 	 */
 	public double getOrientationMinorAxis(){
-		return getOrientation()-90;
+		if(orientation!=-1){
+			return orientation-90;
+		}
+		orientation =getOrientation();
+		return orientation-90;
 	}
 	
 	private double getEigenvalue(boolean major) {
@@ -244,12 +332,28 @@ public class Blob {
 		double c20 = getCentralMoments(2,0)/c00;
 		double c02 = getCentralMoments(0,2)/c00;
 		double c11 = getCentralMoments(1,1)/c00;
-		
+		/*
 		int sign = 1;
 		if(!major){
 			sign = -1;
 		}
 		double value = 0.5*(c20+c02)+sign*0.5*Math.sqrt(4*Math.pow(c11, 2)+Math.pow(c20-c02, 2));
+		*/
+		
+		double valuea = 0.5*(c20+c02)+0.5*Math.sqrt(4*Math.pow(c11, 2)+Math.pow(c20-c02, 2));
+		double valueb = 0.5*(c20+c02)-0.5*Math.sqrt(4*Math.pow(c11, 2)+Math.pow(c20-c02, 2));
+		double value = valuea;
+		if(major){
+			if(valuea<valueb){
+				value = valueb;
+			}
+		}
+		else
+		{
+			if(valuea>valueb){
+				value = valueb;
+			}
+		}
 		return value;
 	}
 	
@@ -257,21 +361,35 @@ public class Blob {
 	 * @return Return the Eigenvalue from the major axis (computational expensive!)
 	 */
 	public double getEigenvalueMajorAxis() {
-		return getEigenvalue(true);
+		if(eigenMajor!=-1){
+			return eigenMajor;
+		}
+		eigenMajor = getEigenvalue(true);
+		return eigenMajor;
 	}
 	
 	/**
 	 * @return Return the Eigenvalue from the minor axis (computational expensive!)
 	 */
 	public double getEigenvalueMinorAxis() {
-		return getEigenvalue(false);
+		if(eigenMinor!=-1){
+			return eigenMinor;
+		}
+		eigenMinor = getEigenvalue(false);
+		return eigenMinor;
 	}
 	
 	/**
 	 * @return The Elongation of the Blob based on its eigenvalues (computational expensive!)
 	 */
 	public double getElongation() {
-		return Math.sqrt(1-getEigenvalueMinorAxis()/getEigenvalueMajorAxis());
+		if(elongation!= -1){
+			return elongation;
+		}
+		double help = 1-getEigenvalueMinorAxis()/getEigenvalueMajorAxis();
+		double elong = Math.sqrt(help);
+		elongation = elong;
+		return elong;
 	}
 	
 	/**
@@ -314,8 +432,8 @@ public class Blob {
 		return contourSignal;
 	}
 	
-	private void fillPolygon(ImageProcessor ip, Polygon p, int fillValue) {
-		PolygonRoi proi = new PolygonRoi(p, PolygonRoi.FREEROI);
+	private void fillPolygon(ImageProcessor ip, Polygon p, boolean internContour) {
+		PolygonRoi proi = new PolygonRoi(p, PolygonRoi.POLYLINE);
 		Rectangle r = proi.getBounds();
 		PolygonFiller pf = new PolygonFiller();
 		pf.setPolygon(proi.getXCoordinates(), proi.getYCoordinates(), proi.getNCoordinates());
@@ -323,6 +441,9 @@ public class Blob {
 		ip.setRoi(r);
 		ImageProcessor objectMask = pf.getMask(r.width, r.height);
 		ip.fill(objectMask);
+		if(!internContour){
+		ip.drawPolygon(p);
+		}
 	}
 	
 	/**
@@ -412,9 +533,19 @@ public class Blob {
 		int[] xpoints = outerContour.xpoints;
 		int[] ypoints = outerContour.ypoints;
 		for(int i = 0; i < outerContour.npoints-1; i++){
-			summe = summe + Math.abs(ypoints[i]+ypoints[i+1])*(xpoints[i]-xpoints[i+1]);
+			summe = summe + Math.abs((ypoints[i]+ypoints[i+1]))*(xpoints[i]-xpoints[i+1]);
 		}
 		enclosedArea = summe/2;
+		
+		if(enclosedArea==0){
+			//Blob is only a line!
+			enclosedArea = getPerimeter()/2;
+			
+		}
+		else{
+			//Consider the Pixels on the Conotour!
+			enclosedArea += outerContour.npoints/2;
+		}
 		return enclosedArea;
 	}
 	

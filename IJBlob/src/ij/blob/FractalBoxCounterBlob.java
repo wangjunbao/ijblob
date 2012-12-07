@@ -55,6 +55,7 @@ public class FractalBoxCounterBlob {
 		Polygon p = blob.getOuterContour();
 		PolygonRoi proi = new PolygonRoi(p, PolygonRoi.FREEROI);
 		Rectangle r = proi.getBounds();
+		r.setBounds(r.x, r.y, (int)r.getWidth()+1, (int)r.getHeight()+1);
 		ImagePlus help = NewImage.createByteImage("", r.width, r.height, 1, NewImage.FILL_BLACK);
 		ImageProcessor ip = help.getProcessor();
 		blob.draw(ip, Blob.DRAW_HOLES);
