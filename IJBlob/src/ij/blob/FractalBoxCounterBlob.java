@@ -52,16 +52,13 @@ public class FractalBoxCounterBlob {
 	 * @return An 2 element array. [0] = Fractal Dimension, [1] = Goodness of Fit
 	 */
 	public double[] getFractcalDimension(Blob blob) {
-		Polygon p = blob.getOuterContour();
-		PolygonRoi proi = new PolygonRoi(p, PolygonRoi.FREEROI);
-		Rectangle r = proi.getBounds();
+		Rectangle r = blob.getOuterContour().getBounds();
 		r.setBounds(r.x, r.y, (int)r.getWidth()+1, (int)r.getHeight()+1);
-		ImagePlus help = NewImage.createByteImage("", r.width, r.height, 1, NewImage.FILL_BLACK);
+		ImagePlus help = NewImage.createByteImage("", r.width, r.height, 1, NewImage.FILL_WHITE);
 		ImageProcessor ip = help.getProcessor();
-		blob.draw(ip, Blob.DRAW_HOLES);
-		ip.invert();
-		imp = new ImagePlus("",ip);
-		
+		blob.draw(ip, Blob.DRAW_HOLES, -r.x, -r.y);
+
+		imp = new ImagePlus("abc",ip);
 		boxCountSums = new float[boxSizes.length];
 		for (int i=0; i<boxSizes.length; i++)
 			maxBoxSize = Math.max(maxBoxSize, boxSizes[i]);

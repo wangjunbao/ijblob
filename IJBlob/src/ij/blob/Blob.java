@@ -18,23 +18,27 @@
 
 package ij.blob;
 import ij.IJ;
+import ij.ImagePlus;
+import ij.gui.NewImage;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.gui.Wand;
+import ij.plugin.Selection;
+import ij.process.ByteProcessor;
+import ij.process.EllipseFitter;
 import ij.process.ImageProcessor;
+import ij.process.ImageStatistics;
 import ij.process.PolygonFiller;
 
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 
 public class Blob {
-	private int gray_background = 255;
-	private int gray_object = 0;
 	
 	public final static int DRAW_HOLES = 1;
 	public final static int DRAW_CONVEX_HULL = 2;
@@ -62,13 +66,13 @@ public class Blob {
 	private double orientation = -1;
 	private double[][] centralMomentsLUT = {{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
 	private double[][] momentsLUT = {{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
+	EllipseFitter fittedEllipse = null;
     
 
 	public Blob(Polygon outerContour, int label) {
 		this.outerContour = outerContour;
 		this.label = label;
 		innerContours = new ArrayList<Polygon>();
-		
 	}
 	
 	/**
@@ -88,6 +92,33 @@ public class Blob {
 			}
 		}
 		
+		if((options&DRAW_CONVEX_HULL)>0){
+			ip.setColor(Color.RED);
+			ip.drawPolygon(getConvexHull());
+		}
+		
+		if((options&DRAW_LABEL)>0){
+			Point cog = getCenterOfGravity();
+			ip.setColor(Color.MAGENTA);
+			ip.drawString(""+getLabel(), cog.x, cog.y);
+		}
+	}
+	
+	void draw(ImageProcessor ip, int options, int deltax, int deltay){
+		ip.setColor(Color.BLACK);
+		Polygon p = new Polygon(outerContour.xpoints,outerContour.ypoints,outerContour.npoints);
+		p.translate(deltax, deltay);
+		fillPolygon(ip, p, false);
+		
+		
+		if((options&DRAW_HOLES)>0){
+			for(int i = 0; i < innerContours.size(); i++) {
+				ip.setColor(Color.WHITE);
+				p = new Polygon(innerContours.get(i).xpoints,innerContours.get(i).ypoints,innerContours.get(i).npoints);
+				p.translate(deltax, deltay);
+				fillPolygon(ip, p, true);
+			}
+		}
 		if((options&DRAW_CONVEX_HULL)>0){
 			ip.setColor(Color.RED);
 			ip.drawPolygon(getConvexHull());
@@ -134,6 +165,12 @@ public class Blob {
 		return centerOfGrafity;
 		
 	}
+	
+	public double getFeretDiameter() {
+		PolygonRoi proi = new PolygonRoi(outerContour, PolygonRoi.POLYLINE);
+		return proi.getFeretsDiameter();
+	}
+	
 	/**
 	 * Region-Based Moments Definition of "Gorman et. al. Practical Algorithms for Image Analysis" (p. 157).
 	 * (computational expensive!)
@@ -148,70 +185,6 @@ public class Blob {
 			 }
 		 }
 		 double moment = 0;
-		 /*
-		 int[] xp = outerContour.xpoints;
-		 int[] yp = outerContour.ypoints;
-		 boolean fastMethod = false;
-		 double faktor=1;
-		
-		for(int k = 1; k<outerContour.npoints; k++)
-		{
-			
-			 if((p==0) && (q == 0)){
-				 moment = getEnclosedArea();
-				 fastMethod=true;
-				 faktor=1;//0.5;
-			 }
-			 else
-			 {
-				 k=outerContour.npoints;
-			 }
-			
-			 if((p==1) && (q == 0)){
-				 moment += 0.5*(xp[k]+xp[k-1])*(yp[k]*xp[k-1]-xp[k]*yp[k-1])-
-						 1.0/6 * (yp[k]-yp[k-1])*(xp[k]*xp[k]+xp[k]*xp[k-1]+
-								 xp[k-1]*xp[k-1]);
-				 fastMethod = true;
-				 faktor=0.5; 
-			 }
-	
-			 else if((p==0) && (q == 1)){
-				 moment += 0.5*(yp[k]+yp[k-1])*(xp[k]*yp[k-1]-yp[k]*xp[k-1])-
-						 1.0/6 * (xp[k]-xp[k-1])*(yp[k]*yp[k]+yp[k]*yp[k-1]+
-								 yp[k-1]*yp[k-1]);
-				 fastMethod = true;
-				 faktor=0.5; 
-			 }
-			 
-			 else if((p==1) && (q == 1)){
-				 moment += (yp[k]*xp[k-1]-xp[k]*yp[k-1])*(2*xp[k]*yp[k]+xp[k-1]*yp[k]+
-						 xp[k]*yp[k-1]+
-						 2*xp[k-1]*yp[k-1]);
-				 fastMethod = true;
-				 faktor =1.0/24;
-			 }
-
-			 else if((p==2) && (q == 0)){
-				 moment += 0.5*(yp[k]*xp[k-1]-xp[k]*yp[k-1])*(xp[k]*xp[k]+
-						 xp[k]*xp[k-1]+xp[k-1]*xp[k-1])-
-						 0.25*(yp[k]-yp[k-1])*(xp[k]*xp[k]*xp[k]+xp[k]*xp[k]*xp[k-1]+xp[k]*xp[k-1]*xp[k-1]+xp[k-1]*xp[k-1]*xp[k-1]);
-				 fastMethod = true;
-				 faktor =1.0/3;
-			 }
-		
-			 else if((p==0) && (q == 2)){
-				 moment += 0.5*(xp[k]*yp[k-1]-yp[k]*xp[k-1])*(yp[k]*yp[k]+
-						 yp[k]*yp[k-1]+yp[k-1]*yp[k-1])-
-						 0.25*(xp[k]-xp[k-1])*(yp[k]*yp[k]*yp[k]+yp[k]*yp[k]*yp[k-1]+yp[k]*yp[k-1]*yp[k-1]+yp[k-1]*yp[k-1]*yp[k-1]);
-				 fastMethod = true;
-				 faktor =1.0/3;
-			 }
-			
-		}
-		*/
-		 
-		
-		
 	
 		Rectangle bounds = outerContour.getBounds();
 		for(int x = bounds.x; x < bounds.x+bounds.width+1;x++){
@@ -312,7 +285,8 @@ public class Blob {
 		if(orientation!=-1){
 			return orientation;
 		}
-		orientation =getOrientation();
+		fitEllipse();
+		orientation = fittedEllipse.angle; 
 		return orientation;
 	}
 	
@@ -323,7 +297,7 @@ public class Blob {
 		if(orientation!=-1){
 			return orientation-90;
 		}
-		orientation =getOrientation();
+		orientation = getOrientationMajorAxis();
 		return orientation-90;
 	}
 	
@@ -380,16 +354,37 @@ public class Blob {
 	}
 	
 	/**
-	 * @return The Elongation of the Blob based on its eigenvalues (computational expensive!)
+	 * @return The Elongation of the Blob based on a fitted ellipse 
 	 */
 	public double getElongation() {
 		if(elongation!= -1){
 			return elongation;
 		}
-		double help = 1-getEigenvalueMinorAxis()/getEigenvalueMajorAxis();
-		double elong = Math.sqrt(help);
-		elongation = elong;
-		return elong;
+		fitEllipse();
+		elongation = 1- fittedEllipse.minor/fittedEllipse.major;
+		elongation = Math.sqrt(elongation);
+
+	//	fillPolygon(ip, p, false);
+	//	help.show();
+		return elongation;
+	}
+	
+	private void fitEllipse(){
+		if(fittedEllipse==null){
+			fittedEllipse = new EllipseFitter();
+			Rectangle r = outerContour.getBounds();
+
+			ImagePlus help = NewImage.createByteImage("", r.width+1, r.height+1, 1, NewImage.FILL_WHITE);
+			ByteProcessor ip =  (ByteProcessor) help.getProcessor();
+			ip.setColor(Color.black);
+			Polygon p = new Polygon(outerContour.xpoints, outerContour.ypoints, outerContour.npoints);
+			p.translate(-r.x, -r.y);
+			ip.resetRoi();
+			ip.setRoi(p);	
+			
+
+			fittedEllipse.fit(ip, null);
+		}
 	}
 	
 	/**
@@ -437,20 +432,44 @@ public class Blob {
 		Rectangle r = proi.getBounds();
 		PolygonFiller pf = new PolygonFiller();
 		pf.setPolygon(proi.getXCoordinates(), proi.getYCoordinates(), proi.getNCoordinates());
-		//ip.setValue(fillValue);
 		ip.setRoi(r);
 		ImageProcessor objectMask = pf.getMask(r.width, r.height);
 		ip.fill(objectMask);
 		if(!internContour){
-		ip.drawPolygon(p);
+			ip.drawPolygon(p);
 		}
 	}
 	
 	/**
-	 * @return The outer contour of an object
+	 * @return The outer contour of an object (polygon points are pixel indicies)
 	 */
 	public Polygon getOuterContour() {
 		return outerContour;
+	}
+	/**
+	 * @return The outer contour as freeman chain code
+	 */
+	public int[] getOuterContourAsChainCode(){
+		return contourToChainCode();
+	}
+	
+	private Polygon convertOCtoPolyVerticies(){
+		return convertPixelIndiciesToPolygonVertices(outerContour);
+	}
+	
+	private Polygon convertPixelIndiciesToPolygonVertices(Polygon polyPixel) {
+		Polygon polyVerticies = new Polygon();
+		
+		Rectangle r = getOuterContour().getBounds();
+		r.setBounds(r.x, r.y, (int)r.getWidth()+1, (int)r.getHeight()+1);
+		ImagePlus help = NewImage.createByteImage("", r.width, r.height, 1, NewImage.FILL_WHITE);
+		ImageProcessor ip = help.getProcessor();
+		draw(ip, Blob.DRAW_HOLES, -r.x, -r.y);
+
+		Wand wand = new Wand(ip);
+		wand.autoOutline(getOuterContour().xpoints[0]-r.x, getOuterContour().ypoints[0]-r.y);
+		polyVerticies.translate(r.x, r.y);
+		return polyVerticies;
 	}
 	
 	/**
@@ -468,7 +487,9 @@ public class Blob {
 		innerContours.add(contour);
 	}
 
-
+	/**
+	 * @return Return blob's label in the labeled image
+	 */
 	public int getLabel() {
 		return label;
 	}
@@ -477,12 +498,56 @@ public class Blob {
 	 * @return The perimeter of the outer contour.
 	 */
 	public double getPerimeter() {
+		
 		if(perimeter!=-1){
 			return perimeter;
 		}
-		PolygonRoi roi = new PolygonRoi(outerContour, Roi.FREEROI);
-		perimeter = roi.getLength();
+
+		int[] cc = contourToChainCode();
+		int sum_gerade= 0;
+		for(int i = 0; i < cc.length;i++){
+			if(cc[i]%2 == 0){
+				sum_gerade++;
+			}
+		}
+	
+		perimeter = sum_gerade*0.948 + (cc.length-sum_gerade)*1.340;
 		return perimeter;
+	}
+	
+	private int[] contourToChainCode() {
+		int[] chaincode = new int[outerContour.npoints-1];
+		for(int i = 1; i <outerContour.npoints; i++){
+			int dx = outerContour.xpoints[i] - outerContour.xpoints[i-1];
+			int dy = outerContour.ypoints[i] - outerContour.ypoints[i-1];
+			
+			if(dx==1 && dy==0){
+				chaincode[i-1] = 0;
+			}
+			else if(dx==1 && dy==1){
+				chaincode[i-1] = 7;
+			}
+			else if(dx==0 && dy==1){
+				chaincode[i-1] = 6;
+			}
+			else if(dx==-1 && dy==1){
+				chaincode[i-1] = 5;
+			}
+			else if(dx==-1 && dy==0){
+				chaincode[i-1] = 4;
+			}
+			else if(dx==-1 && dy==-1){
+				chaincode[i-1] = 3;
+			}
+			else if(dx==0 && dy==-1){
+				chaincode[i-1] = 2;
+			}
+			else if(dx==1 && dy==-1){
+				chaincode[i-1] = 1;
+			}
+		}
+		
+		return chaincode;
 	}
 	
 	/**
@@ -528,8 +593,9 @@ public class Blob {
 		if(enclosedArea!=-1){
 			return enclosedArea;
 		}
-		//Gaußsche Trapezformel
-		int summe = 0;
+		//Gauausche Trapezformel
+		/*
+		float summe = 0;
 		int[] xpoints = outerContour.xpoints;
 		int[] ypoints = outerContour.ypoints;
 		for(int i = 0; i < outerContour.npoints-1; i++){
@@ -544,13 +610,51 @@ public class Blob {
 		}
 		else{
 			//Consider the Pixels on the Conotour!
-			enclosedArea += outerContour.npoints/2;
+			enclosedArea += outerContour.npoints/2 +1;
+		}		
+		*/
+		int[] cc = contourToChainCode();
+		int B = 1;
+		double A = 0;
+		for(int i = 0; i < cc.length; i++){
+			switch(cc[i]){
+			
+			case 0:
+				A -= B;
+				break;
+			case 1:
+				B += 1;
+				A += -(B + 0.5);
+				break;
+			case 2:
+				B += 1;
+				break;
+			case 3:
+				B += 1;
+				A += B+0.5;
+				break;
+			case 4:
+				A += B;
+				break;
+			case 5:
+				B += -1;
+				A += B - 0.5;
+				break;
+			case 6:
+				B += -1;
+				break;
+			case 7:
+				B += -1;
+				A += -(B-0.5);
+				break;
+			}
 		}
+		enclosedArea=Math.abs(A);
 		return enclosedArea;
 	}
 	
 	/**
-	 * Calculates the circularity of the outer contour: (perimeter*perimeter) / (enclosed area)
+	 * Calculates the circularity of the outer contour: (perimeter*perimeter) / (enclosed area). If the value approaches 0.0, it indicates that the polygon is increasingly elongated.
 	 * @return (perimeter*perimeter) / (enclosed area)
 	 */
 	public double getCircularity() {
@@ -564,7 +668,7 @@ public class Blob {
 	}
 	
 	/**
-	 * @return Thinnes Ratio defined as: (4*Math.PI)/Circularity
+	 * @return Thinnes Ratio defined as: (4*PI)/Circularity
 	 */
 	public double getThinnesRatio() {
 		if(thinnesRatio!=-1){

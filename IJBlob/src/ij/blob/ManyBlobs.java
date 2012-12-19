@@ -23,8 +23,8 @@ import java.util.ArrayList;
 
 /*
  * This library extracts connected components . For this purpose it uses the
- * following algorithm : ﻿F. Chang, “A linear-time
- * component-labeling algorithm using contour tracing technique,” Computer
+ * following algorithm : ���F. Chang, ���A linear-time
+ * component-labeling algorithm using contour tracing technique,��� Computer
  * Vision and Image Understanding, vol. 93, no. 2, pp. 206-220, 2004.
  */
 
@@ -62,7 +62,7 @@ public class ManyBlobs extends ArrayList<Blob> {
 	
 	/**
 	 * Start the Connected Component Algorithm
-	 * @see  ﻿F. Chang, “A linear-time component-labeling algorithm using contour tracing technique,” Computer Vision and Image Understanding, vol. 93, no. 2, pp. 206-220, 2004.
+	 * @see  ���F. Chang, ���A linear-time component-labeling algorithm using contour tracing technique,��� Computer Vision and Image Understanding, vol. 93, no. 2, pp. 206-220, 2004.
 	 */
 	public void findConnectedComponents() {
 		ConnectedComponentLabeler labeler = new ConnectedComponentLabeler(this,imp,BACKGROUND,OBJECT);

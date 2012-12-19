@@ -70,7 +70,7 @@ public class ConnectedComponentLabeler {
 	
 	/**
 	 * Start the Connected Component Algorithm
-	 * @see  ﻿F. Chang, “A linear-time component-labeling algorithm using contour tracing technique,” Computer Vision and Image Understanding, vol. 93, no. 2, pp. 206-220, 2004.
+	 * @see  ���F. Chang, ���A linear-time component-labeling algorithm using contour tracing technique,��� Computer Vision and Image Understanding, vol. 93, no. 2, pp. 206-220, 2004.
 	 */
 	public void doConnectedComponents() {
 		

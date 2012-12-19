@@ -1,8 +1,14 @@
 Changelog
 ==V 1.0.6==
 * BugFix: Drawing-Method draws the outer contour imprecise
-* BugFix: The Area values doesnt consider the contour pixels
-
+* BugFix: Wrong values for fractal dimension
+* Add "Ferret Diameter" as Basic Feature
+* The Area is now calculated based on the freeman chain code
+* The perimeter is now calculated based on the freeman chain code
+* Due to improved perimeter and area algorithms the circularity and thinnes ratio are much more consistent!
+* Elongation is now calculated based on a fitted ellipse instead of eigenvalues and therefore much more faster
+* Remove Option "Calculate Elongation" (see above)
+* Getter for Freeman chain code 8-connected representation of the outer boundary (getOuterContourAsChainCode).
 
 ==V 1.0.5==
 * BugFix: Object Pixel in last Image Row leads to "ArrayIndexOutOfBounds"-Exception

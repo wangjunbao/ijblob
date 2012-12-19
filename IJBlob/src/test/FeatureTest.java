@@ -2,6 +2,7 @@ package test;
 
 import static org.junit.Assert.*;
 
+import java.awt.Polygon;
 import java.net.URL;
 
 import ij.IJ;
@@ -33,7 +34,7 @@ public class FeatureTest {
 	public void testGetPerimeterCircleRad30() {
 		URL url = this.getClass().getResource("circle_r30.tif");
 		ImagePlus ip = new ImagePlus(url.getPath());
-		int peri = (int)(2*Math.PI*30);
+		int peri = (int)(2*Math.PI*29.5);
 		ManyBlobs mb = new ManyBlobs(ip);
 		mb.findConnectedComponents();
 		assertEquals(peri, mb.get(0).getPerimeter(),2);
@@ -41,7 +42,12 @@ public class FeatureTest {
 
 	@Test
 	public void testGetPerimeterConvexHull() {
-		fail("Not yet implemented");
+		URL url = this.getClass().getResource("square100x100_minus30x30.png");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		int periConv = 4*100-4; //400-4(-4 Because the Edges doesnt mutiple counted 
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.findConnectedComponents();
+		assertEquals(periConv, mb.get(0).getPerimeterConvexHull(),2);
 	}
 
 	@Test
@@ -97,6 +103,25 @@ public class FeatureTest {
 		ManyBlobs mb = new ManyBlobs(ip);
 		mb.findConnectedComponents();
 		assertEquals(blobs, mb.size(),0);
+	}
+	
+	@Test
+	public void testGetOuterContourIsCorrect() {
+		URL url = this.getClass().getResource("correctcontour.png");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.findConnectedComponents();
+		
+		int[] xp = {3,4,5,6,7,8,9,10,11,11,11,10,9,8,7,6,5,4,3,2,2,2,3};
+		int[] yp = {1,1,2,2,2,1,1,2,2,3,4,4,5,5,4,4,4,5,5,4,3,2,1};
+		
+		Polygon contour = mb.get(0).getOuterContour();
+		
+		int diff=0;
+		for(int i = 0; i < contour.npoints; i++){
+			diff += Math.abs(contour.xpoints[i] - xp[i]) + Math.abs(contour.ypoints[i] - yp[i]);
+		}
+		assertEquals(0,diff,0);
 	}
 
 }
