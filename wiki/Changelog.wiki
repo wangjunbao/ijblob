@@ -4,7 +4,7 @@
 ==V 1.0.6 19.12.2012==
   * Bug Fix: Drawing-Method draws the outer contour imprecise
   * Bug Fix: Wrong values for fractal dimension
-  * Add Blob Feature: "Ferret Diameter"
+  * Add Blob Feature: "Feret Diameter"
   * The Area is now calculated based on the freeman chain code
   * The perimeter is now calculated based on the freeman chain code
   * Due to improved perimeter and area algorithms the circularity and thinnes ratio are much more consistent!
@@ -38,6 +38,11 @@
   * IJBlob works with LUT Inverted Images
 
 =Shape Filter=
+
+==V 1.0.6 19.12.2012==
+  * Based on IJBlob 1.0.6
+  * Elongation is calculated much more faster. There is no need to make it "optional" anymore
+  * Add Option: Feret Diameter
 
 ==V 1.0.5a 02.12.2012==
   * Add Option: Elongation (Computational Expensive) is now "optional".
