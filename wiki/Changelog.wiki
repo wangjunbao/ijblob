@@ -2,8 +2,8 @@
 =IJBlob=
 
 ==V 1.0.6 19.12.2012==
-  * BugFix: Drawing-Method draws the outer contour imprecise
-  * BugFix: Wrong values for fractal dimension
+  * Bug Fix: Drawing-Method draws the outer contour imprecise
+  * Bug Fix: Wrong values for fractal dimension
   * Add Blob Feature: "Ferret Diameter"
   * The Area is now calculated based on the freeman chain code
   * The perimeter is now calculated based on the freeman chain code
