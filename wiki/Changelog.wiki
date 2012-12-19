@@ -1,5 +1,17 @@
 #labels Featured
 =IJBlob=
+
+==V 1.0.6 19.12.2012==
+* BugFix: Drawing-Method draws the outer contour imprecise
+* BugFix: Wrong values for fractal dimension
+* Add Blob Feature: "Ferret Diameter"
+* The Area is now calculated based on the freeman chain code
+* The perimeter is now calculated based on the freeman chain code
+* Due to improved perimeter and area algorithms the circularity and thinnes ratio are much more consistent!
+* Elongation is now calculated based on a fitted ellipse instead of eigenvalues and therefore much more faster
+* Remove Option "Calculate Elongation" (see above)
+* Getter for Freeman chain code 8-connected representation of the outer boundary (getOuterContourAsChainCode).
+
 ==V 1.0.5 23.11.2012==
   * Add Blob Feature: Region Based Moments (getMoments)
   * Add Blob Feature: Central Region Based Moments (getCentralMoments)
