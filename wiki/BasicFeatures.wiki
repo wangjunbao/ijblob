@@ -6,15 +6,15 @@ The area enclosed by the outer contour of the blob.
 The perimeter of outer contur of the blob.
 
 *Perimeter of the convex hull* (H):
-The perimeter of the convex hull of the blob
+The perimeter of the convex hull of the blob.
 
 *Cicularity*:
-Defined as P^2 / A. Has its minimum for a perfect circle by 4*PI
+Defined as P^2 / A. Has its minimum for a perfect circle by 4*PI.
 
 *Thinnes Ratio*:
 Inverse proportional to the circularity. Furthermore it is normed. It is defined as: 4 `*`PI`*`(A/P^2)
 
-*Area/Perimeter Ratio*: Defined as A/P
+*Area/Perimeter Ratio*: Defined as A/P.
 
 *Temperatur of the outer contour*: Defined as https://dl.dropbox.com/u/560426/imagej/temp.gif. It has a strong relationship to the fractal dimension. For further information see `[`1`]`.
 
@@ -27,6 +27,6 @@ https://dl.dropbox.com/u/560426/imagej/moment.gif where x,y are the coordinates 
 
 *Central Region Based Moments*:  Moment of a Region R of order (p+q) with the center of gravity (xc,yc) is defined as: https://dl.dropbox.com/u/560426/imagej/centralmoments.gif
 
-*Feret Diameter*: The longest distance between two pixel on the blob boundary
+*Feret Diameter*: The longest distance between two pixel on the blob boundary.
 
 `[`1`]` Luciano da Fontoura Costa, Roberto Marcondes Cesar, Jr.Shape Classification and Analysis: Theory and Practice, Second Edition, 2009, CRC Press 
