@@ -4,11 +4,11 @@
 ==V 1.0.6 19.12.2012==
   * Bug Fix: Drawing-Method draws the outer contour imprecise
   * Bug Fix: Wrong values for fractal dimension
-  * Add Blob Feature: "Feret Diameter"
+  * Add Blob Feature: "Feret Diameter" (getFeretDiameter)
   * The Area is now calculated based on the freeman chain code
   * The perimeter is now calculated based on the freeman chain code
   * Due to improved perimeter and area algorithms the circularity and thinnes ratio are much more consistent!
-  * Elongation is now calculated based on a fitted ellipse instead of eigenvalues and therefore much more faster
+  * Elongation is now calculated based on a fitted ellipse instead of eigenvalues and therefore much more faster 
   * Remove Option "Calculate Elongation" (see above)
   * Getter for Freeman chain code (8-connected) of the outer boundary (getOuterContourAsChainCode).
 
