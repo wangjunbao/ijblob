@@ -29,4 +29,6 @@ https://dl.dropbox.com/u/560426/imagej/moment.gif where x,y are the coordinates 
 
 *Feret Diameter*: The longest distance between two pixel on the blob boundary.
 
+*Freeman Chain Code*: Outer Contour as Freeman-Chain-Code
+
 `[`1`]` Luciano da Fontoura Costa, Roberto Marcondes Cesar, Jr.Shape Classification and Analysis: Theory and Practice, Second Edition, 2009, CRC Press 
