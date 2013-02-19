@@ -31,6 +31,7 @@ Furthermore I add the marked line to the target in plugins build.xml:
 ...
 }}}
 
+Maybe this is not the best solution, but it works for me.
 == Example 1: Extract the Blobs of an Image and Read the Perimeter of a Blob ==
 {{{
 import ij.blob.*;
