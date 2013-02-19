@@ -7,7 +7,7 @@ I suppose you use Eclipse as IDE. You have to add IJBlob.jar to Librarys in the 
 
 _Project->Properties->Java Build Path->Librarys->Add External JARs._
 
-Furthermore you have to add the following import line:
+Furthermore you have to add the following import line to your code:
 {{{
 import ij.blob.*;
 }}}
