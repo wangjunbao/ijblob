@@ -30,16 +30,18 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import javax.annotation.processing.Processor;
+
 /**
  * Does Connected Component Labeling 
  * @author Thorsten Wagner
  */
-public class ConnectedComponentLabeler {
+class ConnectedComponentLabeler {
 	
 	private ImagePlus imp;
 	private ImageProcessor labledImage;
 	private int NOLABEL = 0;
-	private int labelCount = 1;
+	private int labelCount = 100;
 	private int BACKGROUND = 255;
 	private int OBJECT = 0;
 	private ManyBlobs allBlobs;
@@ -70,7 +72,7 @@ public class ConnectedComponentLabeler {
 	
 	/**
 	 * Start the Connected Component Algorithm
-	 * @see  ���F. Chang, ���A linear-time component-labeling algorithm using contour tracing technique,��� Computer Vision and Image Understanding, vol. 93, no. 2, pp. 206-220, 2004.
+	 * @see  F. Chang, A linear-time component-labeling algorithm using contour tracing technique, Computer Vision and Image Understanding, vol. 93, no. 2, pp. 206-220, 2004.
 	 */
 	public void doConnectedComponents() {
 		
@@ -120,6 +122,25 @@ public class ConnectedComponentLabeler {
 		// printImage(labledImage);
 	}
 	
+
+	public ImagePlus getLabledImage() {
+		ImagePlus img = new ImagePlus("Labeled", labledImage);
+		ColorProcessor proc = (ColorProcessor) img.getProcessor();
+		int[] pixels = (int[]) proc.getPixels();
+		int w = proc.getWidth();
+		int h = proc.getHeight();
+		int value;
+		for (int i = 0; i < h; ++i) {
+			int offset = i * w;
+			for (int j = 0; j < w; ++j) {
+				value = pixels[offset + j];
+				if(value==-1){
+					pixels[offset + j] = 0;
+				}
+			}
+		}
+		return img;
+	}
 
 	private Polygon traceContour(int x, int y, ByteProcessor proc, int label,
 			int start) {
@@ -289,7 +310,8 @@ public class ConnectedComponentLabeler {
 			}
 		}
 
-		if (!hasWhiteBorder) {
+		if (!hasWhiteBorder) 
+		{
 			int fill = NewImage.FILL_WHITE;
 			if(BACKGROUND==0){
 				fill = NewImage.FILL_BLACK;

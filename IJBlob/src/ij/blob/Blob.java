@@ -23,11 +23,9 @@ import ij.gui.NewImage;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.gui.Wand;
-import ij.plugin.Selection;
 import ij.process.ByteProcessor;
 import ij.process.EllipseFitter;
 import ij.process.ImageProcessor;
-import ij.process.ImageStatistics;
 import ij.process.PolygonFiller;
 
 import java.awt.Color;
@@ -36,8 +34,12 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 
-import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
+//import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
 
+/**
+ * Represents a connected component - a so called "blob".
+ * @author Thorsten Wagner
+ */
 public class Blob {
 	
 	public final static int DRAW_HOLES = 1;
@@ -166,6 +168,14 @@ public class Blob {
 		
 	}
 	
+	/**
+	 * Methodname of getFeretDiameter (for filtering).
+	 */
+	public final static String GETFERETDIAMETER = "getFeretDiameter";
+	/**
+	 * Calculates the feret diameter of the outer contour using its chain code
+	 * @return The feret diameter of the outer contour.
+	 */
 	public double getFeretDiameter() {
 		PolygonRoi proi = new PolygonRoi(outerContour, PolygonRoi.POLYLINE);
 		return proi.getFeretsDiameter();
@@ -332,6 +342,7 @@ public class Blob {
 	}
 	
 	/**
+	 * Calculates Eigenvalue from the major axis using the moments of the boundary
 	 * @return Return the Eigenvalue from the major axis (computational expensive!)
 	 */
 	public double getEigenvalueMajorAxis() {
@@ -343,6 +354,7 @@ public class Blob {
 	}
 	
 	/**
+	 * Calculates Eigenvalue from the minor axis using the moments of the boundary
 	 * @return Return the Eigenvalue from the minor axis (computational expensive!)
 	 */
 	public double getEigenvalueMinorAxis() {
@@ -354,7 +366,12 @@ public class Blob {
 	}
 	
 	/**
-	 * @return The Elongation of the Blob based on a fitted ellipse 
+	 * Methodname of getElongation (for filtering).
+	 */
+	public final static String GETELONGATION = "getElongation";
+	/**
+	 * The Elongation of the Blob based on a fitted ellipse (1 - minor axis / major axis)
+	 * @return The Elongation (normed between 0 and 1)
 	 */
 	public double getElongation() {
 		if(elongation!= -1){
@@ -385,18 +402,20 @@ public class Blob {
 
 			fittedEllipse.fit(ip, null);
 		}
+		
 	}
 	
-	/**
+	/*
 	 * Calculates the first k Fourier Descriptor
-	 * @param k	Highest Fourier Descriptor
+	 * @return Array with k Elements which are the k first Fourier Descriptors of the contour.
 	 */
+	/*
 	private double[] getFirstKFourierDescriptors(int k) {
 	
-		/*
+		
 		 * a[2*k] = Re[k], 
 		 * a[2*k+1] = Im[k], 0<=k<n
-		 */
+		 
 		double[] contourSignal = new double[2*outerContour.npoints];
 	
 		int j = 0;
@@ -407,28 +426,63 @@ public class Blob {
 		}
 		DoubleFFT_1D ft = new DoubleFFT_1D(outerContour.npoints);
 		ft.complexForward(contourSignal);
-	
-		for(int i = k+1; i < contourSignal.length; i++){
-				contourSignal[i] = 0;
+		IJ.log("OK: " + outerContour.npoints);
+		IJ.log("CS: " + contourSignal.length);
+		for(int i = 0; i < contourSignal.length; i++){
+		IJ.log(""+contourSignal[i]);
 		}
-		/*
-		ft.complexInverse(contourSignal, false);
-		int[] xpoints = new int[contourSignal.length/2];
-		int[] ypoints = new int[contourSignal.length/2];
+
+
+		k=k*2;
+		double[] fds = new double[k];
+		for(int i = 0; i < k; i++){
+				fds[i] = contourSignal[i];
+		}
 		
-		j=0;
+		return fds;
+	}
+*/
+	/*
+	private void filterContourByFirstKDescriptorsToContour(int k){
+		double[] fds = getFirstKFourierDescriptors(k);
+		DoubleFFT_1D ft = new DoubleFFT_1D(outerContour.npoints);
+		double[] contourSignal = new double[2*outerContour.npoints];
+		IJ.log("N: " + 2*outerContour.npoints);
+		for(int i = 0; i < contourSignal.length; i++){
+			if(i < k){
+			    contourSignal[i] = fds[i];
+			    IJ.log("Set " + i + ": " + fds[i]);
+			}
+			else if(i >= contourSignal.length - k){
+				contourSignal[i] = fds[contourSignal.length-i-1];
+				IJ.log("Set " + i + ": " + fds[contourSignal.length-i-1]);
+				int diff = contourSignal.length-i-1;
+				IJ.log("contourSignal.length-i: " + diff);
+			}
+			else
+			{
+				contourSignal[i] = 0;
+			}
+		}
+		ft.complexInverse(contourSignal, false);
+
+		int[] xpoints = new int[outerContour.npoints];
+		int[] ypoints = new int[outerContour.npoints];
+		
+		int j=0;
 		for(int i = 0; i < contourSignal.length; i=i+2) {
-			xpoints[j] = (int)( (1.0/outerContour.npoints)* contourSignal[i]);
-			ypoints[j] = (int)((1.0/outerContour.npoints) * contourSignal[i+1]);
+			xpoints[j] = (int)( (1.0/(outerContour.npoints-1))* contourSignal[i]);
+			ypoints[j] = (int)((1.0/(outerContour.npoints-1)) * contourSignal[i+1]);
 			j++;
 		}
-		*/
+		Polygon newContour = new Polygon(xpoints, ypoints, j);
+		outerContour = newContour;
 		
-		return contourSignal;
 	}
-	
+	*/
+
 	private void fillPolygon(ImageProcessor ip, Polygon p, boolean internContour) {
-		PolygonRoi proi = new PolygonRoi(p, PolygonRoi.POLYLINE);
+		PolygonRoi proi = new PolygonRoi(p, PolygonRoi.POLYGON);
 		Rectangle r = proi.getBounds();
 		PolygonFiller pf = new PolygonFiller();
 		pf.setPolygon(proi.getXCoordinates(), proi.getYCoordinates(), proi.getNCoordinates());
@@ -441,12 +495,14 @@ public class Blob {
 	}
 	
 	/**
+	 * The outer contour of an object (polygon points are pixel indicies)
 	 * @return The outer contour of an object (polygon points are pixel indicies)
 	 */
 	public Polygon getOuterContour() {
 		return outerContour;
 	}
 	/**
+	 * Calculates the freeman chain code the outer contour
 	 * @return The outer contour as freeman chain code
 	 */
 	public int[] getOuterContourAsChainCode(){
@@ -473,6 +529,7 @@ public class Blob {
 	}
 	
 	/**
+	 * Return all inner contours (holes) of the blob.
 	 * @return Arraylist of the inner contours.
 	 */
 	public ArrayList<Polygon> getInnerContours() {
@@ -483,18 +540,21 @@ public class Blob {
 	 * Adds an inner contour (hole) to blob.
 	 * @param contour Contour of the hole.
 	 */
-	public void addInnerContour(Polygon contour) {
+	void addInnerContour(Polygon contour) {
 		innerContours.add(contour);
 	}
 
 	/**
+	 * Return the label of the blob in the labeled image
 	 * @return Return blob's label in the labeled image
 	 */
 	public int getLabel() {
 		return label;
 	}
 	
+	public final static String GETPERIMETER = "getPerimeter";
 	/**
+	 * Calculates the perimeter of the outer contour using its chain code
 	 * @return The perimeter of the outer contour.
 	 */
 	public double getPerimeter() {
@@ -551,6 +611,11 @@ public class Blob {
 	}
 	
 	/**
+	 * Methodname of getPerimeterConvexHull (for filtering).
+	 */
+	public final static String GETPERIMETERCONVEXHULL = "getPerimeterConvexHull";
+	/**
+	 * Calculates the perimeter of the convex hull
 	 * @return The perimeter of the convex hull
 	 */
 	public double getPerimeterConvexHull() {
@@ -569,7 +634,6 @@ public class Blob {
 			IJ.log("Blob ID: "+ getLabel() +" Error calculating the perimeter of the convex hull. Returning the regular perimeter");
 		}
 		
-		
 		return perimeterConvexHull;
 	}
 	
@@ -577,6 +641,7 @@ public class Blob {
 	 * Returns the convex hull of the blob.
 	 * @return The convex hull as polygon
 	 */
+
 	public Polygon getConvexHull() {
 		PolygonRoi roi = new PolygonRoi(outerContour, Roi.POLYGON);
 		Polygon hull = roi.getConvexHull();
@@ -587,32 +652,17 @@ public class Blob {
 	}
 	
 	/**
+	 * Methodname of getEnclosedArea (for filtering).
+	 */
+	public final static String GETENCLOSEDAREA = "getEnclosedArea";
+	/**
+	 * Calculates the enclosed are of the outer contour without subsctracting possible holes.
 	 * @return The enclosed area of the outer contour (without substracting the holes).
 	 */
 	public double getEnclosedArea() {
 		if(enclosedArea!=-1){
 			return enclosedArea;
 		}
-		//Gauausche Trapezformel
-		/*
-		float summe = 0;
-		int[] xpoints = outerContour.xpoints;
-		int[] ypoints = outerContour.ypoints;
-		for(int i = 0; i < outerContour.npoints-1; i++){
-			summe = summe + Math.abs((ypoints[i]+ypoints[i+1]))*(xpoints[i]-xpoints[i+1]);
-		}
-		enclosedArea = summe/2;
-		
-		if(enclosedArea==0){
-			//Blob is only a line!
-			enclosedArea = getPerimeter()/2;
-			
-		}
-		else{
-			//Consider the Pixels on the Conotour!
-			enclosedArea += outerContour.npoints/2 +1;
-		}		
-		*/
 		int[] cc = contourToChainCode();
 		int B = 1;
 		double A = 0;
@@ -650,12 +700,17 @@ public class Blob {
 			}
 		}
 		enclosedArea=Math.abs(A);
+		//filterContourByFirstKDescriptorsToContour(5);
 		return enclosedArea;
 	}
 	
 	/**
+	 * Methodname of getCircularity (for filtering).
+	 */
+	public final static String GETCIRCULARITY = "getCircularity";
+	/**
 	 * Calculates the circularity of the outer contour: (perimeter*perimeter) / (enclosed area). If the value approaches 0.0, it indicates that the polygon is increasingly elongated.
-	 * @return (perimeter*perimeter) / (enclosed area)
+	 * @return Circularity (perimeter*perimeter) / (enclosed area)
 	 */
 	public double getCircularity() {
 		if(circularity!=-1){
@@ -666,8 +721,12 @@ public class Blob {
 		circularity = (perimeter*perimeter) / size;
 		return circularity;
 	}
-	
 	/**
+	 * Methodname of getThinnesRatio (for filtering).
+	 */
+	public final static String GETTHINNESRATIO = "getThinnesRatio";
+	/**
+	 * The Thinnes Ratio of the blob (normed). A circle has a thinnes ratio of 1. 
 	 * @return Thinnes Ratio defined as: (4*PI)/Circularity
 	 */
 	public double getThinnesRatio() {
@@ -678,7 +737,13 @@ public class Blob {
 		thinnesRatio = (thinnesRatio>1)?1:thinnesRatio;
 		return thinnesRatio;
 	}
+	
 	/**
+	 * Methodname of getAreaToPerimeterRatio (for filtering).
+	 */
+	public final static String GETAREATOPERIMETERRATIO = "getAreaToPerimeterRatio";
+	/**
+	 * Area/Perimeter
 	 * @return Area to perimeter ratio
 	 */
 	public double getAreaToPerimeterRatio() {
@@ -688,8 +753,14 @@ public class Blob {
 		areaToPerimeterRatio = getEnclosedArea()/getPerimeter();
 		return areaToPerimeterRatio;
 	}
+	
 	/**
-	 * @return Contour Temperatur (normed). It has a strong relationship to the fractal dimension.
+	 * Methodname of getContourTemperature (for filtering).
+	 */
+	public final static String GETCONTOURTEMPERATURE = "getContourTemperature";
+	/**
+	 * Calculates the Contour Temperatur. It has a strong relationship to the fractal dimension.
+	 * @return Contour Temperatur
 	 * @see Datails in Luciano da Fontoura Costa, Roberto Marcondes Cesar,
 	 * Jr.Shape Classification and Analysis: Theory and Practice, Second Edition, 2009, CRC Press 
 	 */
@@ -702,7 +773,9 @@ public class Blob {
 		temperature = 1/(Math.log((2*peri)/(Math.abs(peri-chp)))/Math.log(2));
 		return temperature;
 	}
+	
 	/**
+	 * Box Dimension of the blob boundary.
 	 * @return Calculates the fractal box dimension of the blob.
 	 * @param boxSizes ordered array of Box-Sizes
 	 */
@@ -719,6 +792,10 @@ public class Blob {
 	}
 	
 	/**
+	 * Methodname of getContourTemperature (for filtering).
+	 */
+	public final static String GETFRACTALBOXDIMENSION = "getFractalBoxDimension";
+	/**
 	 * @return The fractal box dimension of the blob.
 	 */
 	public double getFractalBoxDimension() {
@@ -733,12 +810,14 @@ public class Blob {
 	}
 	
 	/**
+	 * The goodness of the "best fit" line of the fractal box dimension estimation.
 	 * @return The goodness of the "best fit" line of the fractal box dimension estimation.
 	 */
 	public double getFractalDimensionGoodness(){
 		return fractalDimensionGoodness;
 	}
 	/**
+	 * The number of inner contours (Holes) of a blob.
 	 * @return The number of inner contours (Holes) of a blob.
 	 */
 	public int getNumberofHoles() {

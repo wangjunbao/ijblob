@@ -31,7 +31,7 @@ assumes that the object is always low-dimensional (i.e. the phase with
 the smallest number of pixels). Now it works fine for sets with D near to 2.0
 
 */
-public class FractalBoxCounterBlob {
+class FractalBoxCounterBlob {
 	static String sizes = "2,3,4,6,8,12,16,32,64";
 	static boolean blackBackground;
 	int[] boxSizes;
@@ -107,7 +107,6 @@ public class FractalBoxCounterBlob {
 			ip.setRoi(left, 0, 1, height);
 			histogram = ip.getHistogram();
 		} while (histogram[foreground]==0);
-
 		//Find top edge
 		top = -1;
 		do {

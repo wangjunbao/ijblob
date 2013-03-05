@@ -21,7 +21,7 @@ public class FeatureTest {
 		mb.findConnectedComponents();
 		int centerx = mb.get(0).getCenterOfGravity().x;
 		int centery = mb.get(0).getCenterOfGravity().y;
-		double diff = Math.abs(47-centerx)+Math.abs(47-centery);
+		double diff = Math.abs(48-centerx)+Math.abs(48-centery);
 		assertEquals(0, diff,0);
 	}
 
@@ -54,16 +54,17 @@ public class FeatureTest {
 	public void testEnclosedAreaCircleRad30() {
 		URL url = this.getClass().getResource("circle_r30.tif");
 		ImagePlus ip = new ImagePlus(url.getPath());
-		int area = (int)(Math.PI*30*30);
+		int area = (int)(Math.PI*29.5*29.5);
 		ManyBlobs mb = new ManyBlobs(ip);
 		mb.findConnectedComponents();
-		assertEquals(area, mb.get(0).getEnclosedArea(),2);
+		assertEquals(area, mb.get(0).getEnclosedArea(),10);
 		
 	}
 
 	@Test
 	public void testGetCircularity() {
 		fail("Not yet implemented");
+		
 	}
 
 	@Test

@@ -1,4 +1,9 @@
 Changelog
+
+==V 1.0.7==
+* Add Getter: getLabeledImage();
+* Add Blob Filter: ManyBlobs.filterBlobs();
+
 ==V 1.0.6==
 * BugFix: Drawing-Method draws the outer contour imprecise
 * BugFix: Wrong values for fractal dimension
