@@ -119,6 +119,8 @@ public int getMeanOfMyFeature(int a, double c) {
 }
 }}}
 
+== Example 4: Filter blobs by your own features ==
+I suppose you have added your own feature to the blob class as described in example 3.
 
 
 =Shape Filter=
