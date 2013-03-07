@@ -130,7 +130,7 @@ public void someMethod(ImagePlus imp) {
   ManyBlobs allBlobs = new ManyBlobs(imp); 
   allBlobs.findConnectedComponents(); 
 
-  /* Return all blobs with an area between 20 and 100 pixel² */
+  /* Return all blobs with an 'feature value' between 20 and 100 */
   ManyBlobs filteredBlobs = allBlobs.filterBlobs(20,100,"mySecondFancyFeature"); 
 }
 }}}
