@@ -45,6 +45,20 @@ public void someMethod(ImagePlus imp) {
 }
 }}}
 
+== Example 2: Filter blobs by blob features ==
+In IJBlob 1.1 a filter framework was introduced. Each build-in blob feature has a static identifier (in this example "GETENCLOSEDAREA").
+{{{
+import ij.blob.*;
+...
+private ManyBlobs allBlobs;
+...
+public void someMethod(ImagePlus imp) {
+  ManyBlobs allBlobs = new ManyBlobs(imp); // Extended ArrayList
+  allBlobs.findConnectedComponents(); // Start the Connected Component Algorithm
+  ManyBlobs filteredBlobs = allBlobs.filterBlobs(20,100, Blob.GETENCLOSEDAREA); //Return all blobs with an area between 20 and 100 pixel²
+}
+}}}
+
 =Shape Filter=
 == Install the `ShapeFilter` Plugin ==
 Only copy the `ShapeFilter``_`vX.X.X`_`.jar in your ImageJ Plugin Folder
