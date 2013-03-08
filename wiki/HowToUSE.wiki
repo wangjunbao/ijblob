@@ -66,7 +66,7 @@ public void someMethod(ImagePlus imp) {
 
 == Example 3: Add your own features ==
 IJBlob 1.1 is easily expandable by your own features. First you have to derive a feature class from the "CustomBlobFeature" class. The feature class can also contain multiple features. With the "getBlob()" method you get the reference to the Blob and have full access to the contour data and the other features.
-Please note: If your feature method have primitive data types (int/float/double) as parameters you have to use the wrapper classes (Integer/Float/Double).
+*Please note: If your feature method have primitive data types (int/float/double) as parameters you have to use the wrapper classes (Integer/Float/Double).*
 {{{
 import ij.blob.*;
 
@@ -134,7 +134,7 @@ public void someMethod(ImagePlus imp) {
   ManyBlobs filteredBlobs = allBlobs.filterBlobs(20,100,"mySecondFancyFeature"); 
 }
 }}}
-Please note that for filtering the return value of the custom method has to be Integer or Double.
+*Please note that for filtering the return value of the custom method has to be Integer or Double.*
 =Shape Filter=
 == Install the `ShapeFilter` Plugin ==
 Only copy the `ShapeFilter``_`vX.X.X`_`.jar in your ImageJ Plugin Folder
