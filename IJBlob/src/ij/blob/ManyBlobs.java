@@ -20,8 +20,11 @@ TABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 package ij.blob;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.NewImage;
+import ij.process.ColorProcessor;
 import ij.process.ImageStatistics;
 
+import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -96,6 +99,12 @@ public class ManyBlobs extends ArrayList<Blob> {
 		return labeledImage;
 	}
 	
+
+	public void setLabeledImage(ImagePlus p) {
+		labeledImage = p;
+	}
+	
+	
 	/**
 	 * Filter all blobs which feature (specified by the methodName) is lower than 
 	 * the lowerLimit or higher than the upper limit.
@@ -105,14 +114,74 @@ public class ManyBlobs extends ArrayList<Blob> {
 	 * @param upperLimit Upper limit for the feature to filter blobs.
 	 * @return The filtered blobs.
 	 */
-	public ManyBlobs filterBlobs(String methodName, double lowerLimit, double upperLimit){
+	public ManyBlobs filterBlobs(double lowerLimit, double upperLimit, String methodName, Object... methodparams){
 		ManyBlobs blobs = new ManyBlobs();
+		blobs.setImage(imp);
+		Class classparams[] = {};
+		if(methodparams.length >0){
+			classparams = new Class[methodparams.length];
+			for(int i = 0; i< methodparams.length; i++){
+				classparams[i] = methodparams[i].getClass();
+			}
+		}
+		
 		try {
-			Method m = Blob.class.getMethod(methodName, null);
+			boolean methodInBuild = true;
+			boolean methodIsCustom = false;
+			Method m = null;
+			try {
+				m = Blob.class.getMethod(methodName, classparams);
+			}
+			catch (NoSuchMethodException e) {
+				methodInBuild = false;
+				
+			}
+			int featureIndex = 0;
+			if(!methodInBuild){
+				for(int i = 0; i < Blob.customFeatures.size(); i++){
+					Method customMethods[] = Blob.customFeatures.get(i).getClass().getDeclaredMethods();
+					for(int j = 0; j < customMethods.length; j++){
+						if(customMethods[j].getName() == methodName){
+							
+							methodIsCustom = true;
+							featureIndex = j;
+							m = customMethods[j];
+							break;
+						}
+					}
+					if(methodIsCustom){break;}
+				}
+			}
+			
 			for(int i = 0; i < this.size(); i++) {
-				double value = (Double)m.invoke(this.get(i), null);
+				double value = 0;
+				Object methodvalue = null;
+				if(methodInBuild){
+					methodvalue = m.invoke(this.get(i), methodparams);
+				}
+				else if(methodIsCustom){
+					methodvalue =  m.invoke((Blob.customFeatures.get(featureIndex)), methodparams);
+				}
+				else{
+					throw new NoSuchMethodException("The method " + methodName + " was not found");
+				}
+
+				if (methodvalue instanceof Integer){
+					int help = (Integer) methodvalue;
+					value = (double)help;
+				}
+				else if (methodvalue instanceof Double){
+					value= (Double) methodvalue;
+				}
+				else {
+					IJ.log("Return type not supported");
+				}
 				boolean included= false;
-				if (Double.isInfinite(upperLimit)) {
+				
+				if (Double.isNaN(value)){
+					included = true;
+				}
+				else if (Double.isInfinite(upperLimit)) {
 					included =  (value >= lowerLimit) ? true : false;
 				}
 				else
@@ -124,34 +193,56 @@ public class ManyBlobs extends ArrayList<Blob> {
 				}
 			}
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
 			IJ.log("Method not found: " + e.getMessage());
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		blobs.setLabeledImage(generateLabeledImageFromBlobs(blobs));
 		return blobs;
 		
 	}
+	
+
+	
+	private ImagePlus generateLabeledImageFromBlobs(ManyBlobs blobs){
+		
+		ImagePlus labImg = NewImage.createRGBImage("Labeled Image", labeledImage.getWidth() , labeledImage.getHeight(), 1, NewImage.FILL_WHITE);
+		ColorProcessor labledImageProc = (ColorProcessor)labImg.getProcessor();
+		for(int i = 0; i < blobs.size(); i++){
+			int helpcol = (int)(((double)i)/blobs.size() * (255*255*255));
+			blobs.get(i).drawLabels(labledImageProc,new Color(helpcol));
+		}
+		
+		return labImg;
+	}
+	
 	/**
-	 * Filter all blobs which feature (specified by the methodName) is lower than 
-	 * the limit.
-	 * For instance: filterBlobs(Blob.GETENCLOSEDAREA,40) will filter all blobs with an area lower than 40 pixel²
+	 * Filter all blobs which feature (specified by the methodName) is higher than 
+	 * the lowerLimit and lower than the upper limit.
+	 * For instance: filterBlobs(Blob.GETENCLOSEDAREA,40,100) will filter all blobs between 40 and 100 pixel².
 	 * @param methodName Getter method of the blob feature (double as return value).
-	 * @param limit Limit for the feature to filter blobs.
+	 * @param limits First Element is the lower limit, secod element is the upper limit
+	 * @return The filtered blobs.
+	 */
+	public ManyBlobs filterBlobs(double[] limits, String methodName, Object... methodparams){
+		return filterBlobs(limits[0], limits[1], methodName,methodparams);
+	}
+	/**
+	 * Filter all blobs which feature (specified by the methodName) is higher than 
+	 * the lower limit.
+	 * For instance: filterBlobs(Blob.GETENCLOSEDAREA,40) will filter all blobs with an area higher than 40 pixel²
+	 * @param methodName Getter method of the blob feature (double as return value).
+	 * @param lowerlimit Lower limit for the feature to filter blobs.
 	 * @return The filtered blobs.
 	 * */
-	public ManyBlobs filterBlobs(String methodName, double limit){
-		return filterBlobs(methodName, limit, Double.POSITIVE_INFINITY);
+	public ManyBlobs filterBlobs(double lowerlimit, String methodName, Object... methodparams){
+		return filterBlobs(lowerlimit, Double.POSITIVE_INFINITY, methodName, methodparams);
 	}
 
 

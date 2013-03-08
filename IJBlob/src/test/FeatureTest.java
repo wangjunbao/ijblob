@@ -7,11 +7,67 @@ import java.net.URL;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.blob.Blob;
 import ij.blob.ManyBlobs;
 
 import org.junit.Test;
 
 public class FeatureTest {
+	
+	@Test
+	public void testCustomBlobFeature() {
+		URL url = this.getClass().getResource("circle_r30.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.findConnectedComponents();
+		ExampleBlobFeature test = new ExampleBlobFeature();
+		Blob.addCustomFeature(test);
+		int a  = 10;
+		float c = 1.5f;
+		double featurevalue = (Double)mb.get(0).evaluateCustomFeature("myFancyFeature",a,c);
+		double diff = mb.get(0).getEnclosedArea()-featurevalue;
+		assertEquals(-(c*a-1)*mb.get(0).getEnclosedArea(), diff,0);
+	}
+	
+	@Test
+	public void testCustomBlobFeature2() {
+		URL url = this.getClass().getResource("circle_r30.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.findConnectedComponents();
+		ExampleBlobFeature test = new ExampleBlobFeature();
+		Blob.addCustomFeature(test);
+		int a  = 10;
+		double c = 1.5;
+		int featurevalue = (Integer)mb.get(0).evaluateCustomFeature("mySecondFancyFeature",a,c);
+		double diff = mb.get(0).getEnclosedArea()-featurevalue;
+		assertEquals(-(c*a-1)*mb.get(0).getEnclosedArea(), diff,0);
+	}
+	
+	@Test
+	public void testFilterCustomBlobFeature() {
+		URL url = this.getClass().getResource("circle_r30.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.findConnectedComponents();
+		ExampleBlobFeature test = new ExampleBlobFeature();
+		Blob.addCustomFeature(test);
+		ManyBlobs filtered = mb.filterBlobs(6, "myThirdFancyFeature");
+		assertEquals(filtered.size(), 0,0);
+	}
+	
+	@Test
+	public void testFilterCustomBlobFeature2() {
+		URL url = this.getClass().getResource("circle_r30.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.findConnectedComponents();
+		ExampleBlobFeature test = new ExampleBlobFeature();
+		Blob.addCustomFeature(test);
+		ManyBlobs filtered = mb.filterBlobs(4, "myThirdFancyFeature");
+		assertEquals(filtered.size(), 1,0);
+	}
+
 
 	@Test
 	public void testGetCenterOfGravity() {

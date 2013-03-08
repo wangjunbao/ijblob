@@ -22,7 +22,6 @@ import ij.ImagePlus;
 import ij.gui.NewImage;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
-import ij.gui.Wand;
 import ij.process.ByteProcessor;
 import ij.process.EllipseFitter;
 import ij.process.ImageProcessor;
@@ -32,6 +31,8 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 //import edu.emory.mathcs.jtransforms.fft.DoubleFFT_1D;
@@ -69,7 +70,7 @@ public class Blob {
 	private double[][] centralMomentsLUT = {{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
 	private double[][] momentsLUT = {{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
 	EllipseFitter fittedEllipse = null;
-    
+    static ArrayList<CustomBlobFeature> customFeatures = new ArrayList<CustomBlobFeature>();
 
 	public Blob(Polygon outerContour, int label) {
 		this.outerContour = outerContour;
@@ -77,13 +78,66 @@ public class Blob {
 		innerContours = new ArrayList<Polygon>();
 	}
 	
+	public static void addCustomFeature(CustomBlobFeature feature) {
+		customFeatures.add(feature);
+	}
+	
 	/**
-	 * Draws the Blob with or without its holes.
-	 * @param ip The ImageProcesser in which the blob has to be drawn.
-	 * @param options Drawing Options are DRAW_HOLES, DRAW_CONVEX_HULL, DRAW_LABEL. Combinations with | are possible.
+	 * Evaluates the Custom Feature and return its value
+	 * @param methodname The method name of the method in the feature class
+	 * @param params the parameters of the method specified by the method name
 	 */
-	public void draw(ImageProcessor ip, int options){
-		ip.setColor(Color.BLACK);
+	public Object evaluateCustomFeature(String methodName, Object... params) {
+		Boolean methodfound = false;
+		int featureIndex = -1;
+		for(int i = 0; i < customFeatures.size(); i++){
+			Method customMethods[] = customFeatures.get(i).getClass().getDeclaredMethods();
+			for(int j = 0; j < customMethods.length; j++){
+				if(customMethods[j].getName() == methodName){
+					
+					methodfound = true;
+					featureIndex = i;
+					break;
+				}
+			}
+			if(methodfound){break;}
+		}
+		Class classparams[] = {};
+		if(params.length >0){
+			classparams = new Class[params.length];
+			for(int i = 0; i< params.length; i++){
+				classparams[i] = params[i].getClass();
+			}
+		}
+		Object value=0;
+		try {
+			customFeatures.get(featureIndex).setup(this);
+			Method m = customFeatures.get(featureIndex).getClass().getMethod(methodName, classparams);
+			
+			value = m.invoke((customFeatures.get(featureIndex)), params);
+			
+		} catch (NoSuchMethodException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return value;
+	}
+	
+	void draw(ImageProcessor ip, int options, Color col){
+		ip.setColor(col);
 		fillPolygon(ip, outerContour, false);
 		
 		
@@ -104,6 +158,15 @@ public class Blob {
 			ip.setColor(Color.MAGENTA);
 			ip.drawString(""+getLabel(), cog.x, cog.y);
 		}
+	}
+	
+	/**
+	 * Draws the Blob with or without its holes.
+	 * @param ip The ImageProcesser in which the blob has to be drawn.
+	 * @param options Drawing Options are DRAW_HOLES, DRAW_CONVEX_HULL, DRAW_LABEL. Combinations with | are possible.
+	 */
+	public void draw(ImageProcessor ip, int options){
+		draw(ip, options, Color.BLACK);
 	}
 	
 	void draw(ImageProcessor ip, int options, int deltax, int deltay){
@@ -140,6 +203,10 @@ public class Blob {
 	public void draw(ImageProcessor ip){
 		draw(ip,DRAW_HOLES);
 	}
+	
+	void drawLabels(ImageProcessor ip, Color col) {
+		draw(ip,DRAW_HOLES,col);
+	}
 		
 	/**
 	 * Return the geometric center of gravity of the blob. It
@@ -157,13 +224,25 @@ public class Blob {
 	    int[] y = outerContour.ypoints;
 	    int sumx = 0;
 	    int sumy = 0;
-	    for(int i = 0; i < outerContour.npoints-1; i++){
-	    	int cross = (x[i]*y[i+1]-x[i+1]*y[i]);
-	    	sumx = sumx + (x[i]+x[i+1])*cross;
-	    	sumy = sumy + (y[i]+y[i+1])*cross;
+
+	    if(outerContour.npoints < 4){
+	    	for(int i = 0; i < outerContour.npoints; i++) {
+	    		sumx = sumx + x[i];
+	    		sumy = sumy + y[i];
+	    	}
+	    	centerOfGrafity.x = (int)(sumx/(outerContour.npoints));
+		    centerOfGrafity.y = (int)(sumy/(outerContour.npoints));
 	    }
-	    centerOfGrafity.x = (int)(sumx/(6*getEnclosedArea()));
-	    centerOfGrafity.y = (int)(sumy/(6*getEnclosedArea()));
+	    else{
+	    	for(int i = 0; i < outerContour.npoints-1; i++){
+	    		int cross = (x[i]*y[i+1]-x[i+1]*y[i]);
+	    		sumx = sumx + (x[i]+x[i+1])*cross;
+	    		sumy = sumy + (y[i]+y[i+1])*cross;
+	    	}
+	    	centerOfGrafity.x = (int)(sumx/(6*getEnclosedArea()));
+		    centerOfGrafity.y = (int)(sumy/(6*getEnclosedArea()));
+	    }
+	    
 		return centerOfGrafity;
 		
 	}
@@ -509,24 +588,6 @@ public class Blob {
 		return contourToChainCode();
 	}
 	
-	private Polygon convertOCtoPolyVerticies(){
-		return convertPixelIndiciesToPolygonVertices(outerContour);
-	}
-	
-	private Polygon convertPixelIndiciesToPolygonVertices(Polygon polyPixel) {
-		Polygon polyVerticies = new Polygon();
-		
-		Rectangle r = getOuterContour().getBounds();
-		r.setBounds(r.x, r.y, (int)r.getWidth()+1, (int)r.getHeight()+1);
-		ImagePlus help = NewImage.createByteImage("", r.width, r.height, 1, NewImage.FILL_WHITE);
-		ImageProcessor ip = help.getProcessor();
-		draw(ip, Blob.DRAW_HOLES, -r.x, -r.y);
-
-		Wand wand = new Wand(ip);
-		wand.autoOutline(getOuterContour().xpoints[0]-r.x, getOuterContour().ypoints[0]-r.y);
-		polyVerticies.translate(r.x, r.y);
-		return polyVerticies;
-	}
 	
 	/**
 	 * Return all inner contours (holes) of the blob.
@@ -562,7 +623,11 @@ public class Blob {
 		if(perimeter!=-1){
 			return perimeter;
 		}
-
+		if(outerContour.npoints == 1)
+		{
+			perimeter=1;
+			return perimeter;
+		}
 		int[] cc = contourToChainCode();
 		int sum_gerade= 0;
 		for(int i = 0; i < cc.length;i++){
@@ -701,6 +766,9 @@ public class Blob {
 		}
 		enclosedArea=Math.abs(A);
 		//filterContourByFirstKDescriptorsToContour(5);
+		if(enclosedArea==0){
+			enclosedArea=1;
+		}
 		return enclosedArea;
 	}
 	
@@ -816,6 +884,11 @@ public class Blob {
 	public double getFractalDimensionGoodness(){
 		return fractalDimensionGoodness;
 	}
+	
+	/**
+	 * Methodname of GETNUMBEROFHOLES (for filtering).
+	 */
+	public final static String GETNUMBEROFHOLES = "getNumberofHoles";
 	/**
 	 * The number of inner contours (Holes) of a blob.
 	 * @return The number of inner contours (Holes) of a blob.

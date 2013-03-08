@@ -30,8 +30,6 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import javax.annotation.processing.Processor;
-
 /**
  * Does Connected Component Labeling 
  * @author Thorsten Wagner
