@@ -42,6 +42,8 @@
   * IJBlob works with LUT Inverted Images
 
 =Shape Filter=
+==V 1.0.7 07.03.2013==
+  * Code refactoring for IJBlob 1.1
 
 ==V 1.0.6 19.12.2012==
   * Based on IJBlob 1.0.6
