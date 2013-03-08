@@ -107,7 +107,7 @@ public int getMeanOfMyFeature(int a, double c) {
      /* 
       * The first parameter is the name of feature method followed 
       * by its parameters. Please note that you have to convert the
-      * the returned value in the corresponding datatype.
+      * the return value in the corresponding data type.
       */
       sum += (Integer)allBlobs.get(i).getCustomFeature("mySecondFancyFeature",a,c);
   }
