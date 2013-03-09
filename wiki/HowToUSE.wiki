@@ -131,7 +131,9 @@ public void someMethod(ImagePlus imp) {
   allBlobs.findConnectedComponents(); 
 
   /* Return all blobs with an 'feature value' between 20 and 100 */
-  ManyBlobs filteredBlobs = allBlobs.filterBlobs(20,100,"mySecondFancyFeature"); 
+  int a = 10;
+  double b = 20;
+  ManyBlobs filteredBlobs = allBlobs.filterBlobs(20,100,"mySecondFancyFeature",a,b); 
 }
 }}}
 *Please note that for filtering the return value of the custom method has to be Integer or Double.*
