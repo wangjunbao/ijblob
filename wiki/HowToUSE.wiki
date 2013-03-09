@@ -78,7 +78,7 @@ public class ExampleBlobFeature extends CustomBlobFeature {
 	}
 	
 	public int mySecondFancyFeature(Integer a, Double b){
-		int feature = (int)(b*getBlob().getEnclosedArea()*a);
+		int feature = (int)(b*getBlob().getAreaToPerimeterRatio() *a);
 		return feature;
 	}
 	
