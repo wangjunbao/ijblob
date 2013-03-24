@@ -20,6 +20,7 @@ package ij.blob;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.NewImage;
+import ij.plugin.CanvasResizer;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
@@ -310,25 +311,8 @@ class ConnectedComponentLabeler {
 
 		if (!hasWhiteBorder) 
 		{
-			int fill = NewImage.FILL_WHITE;
-			if(BACKGROUND==0){
-				fill = NewImage.FILL_BLACK;
-			}
-			imp = NewImage.createByteImage("", img.getWidth() + 2,
-					img.getHeight() + 2, 1, fill);
-			ImageProcessor ip = imp.getProcessor();
-
-			ByteProcessor newproc = (ByteProcessor) ip;
-
-			byte[] newpixels = (byte[]) newproc.getPixels();
-
-			// double value;
-			for (int i = 0; i < oldip.getHeight(); ++i) {
-				int offset = i * w;
-				for (int j = 0; j < oldip.getWidth(); ++j) {
-					newpixels[(i + 1) * (w + 2) + j + 1] = pixels[offset + j];
-				}
-			}
+			CanvasResizer resizer = new CanvasResizer();
+			img.setProcessor(resizer.expandImage(img.getProcessor(), img.getWidth()+2, img.getHeight()+2, 1, 1));
 		} else
 		{
 			imp = img;

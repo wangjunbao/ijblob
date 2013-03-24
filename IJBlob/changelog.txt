@@ -1,8 +1,12 @@
 Changelog
 
+==V 1.0.8==
+* Some Refactoring
+
 ==V 1.0.7==
 * Add Getter: getLabeledImage();
 * Add Blob Filter: ManyBlobs.filterBlobs();
+* Remove some unnecessary library dependencies.
 
 ==V 1.0.6==
 * BugFix: Drawing-Method draws the outer contour imprecise

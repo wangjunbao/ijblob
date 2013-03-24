@@ -10,11 +10,15 @@ public class ExampleBlobFeature extends CustomBlobFeature {
 	}
 	
 	public int mySecondFancyFeature(Integer a, Double b){
-		int feature = (int)(b*getBlob().getEnclosedArea()*a);
+		int feature = (int)(b*getBlob().getAreaToPerimeterRatio() *a);
 		return feature;
 	}
 	
 	public int myThirdFancyFeature(){
+		return 5;
+	}
+	
+	public int myFourthFancyFeature(Integer a, Double b){
 		return 5;
 	}
 	

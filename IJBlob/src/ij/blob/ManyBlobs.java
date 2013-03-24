@@ -62,6 +62,8 @@ public class ManyBlobs extends ArrayList<Blob> {
 		setImage(imp);
 	}
 	
+	
+	
 	private void setImage(ImagePlus imp) {
 		this.imp = imp;
 		ImageStatistics stats = imp.getStatistics();
@@ -106,8 +108,8 @@ public class ManyBlobs extends ArrayList<Blob> {
 	
 	
 	/**
-	 * Filter all blobs which feature (specified by the methodName) is lower than 
-	 * the lowerLimit or higher than the upper limit.
+	 * Filter all blobs which feature (specified by the methodName) is higher than 
+	 * the lowerLimit or lower than the upper limit.
 	 * For instance: filterBlobs(Blob.GETENCLOSEDAREA,40,100) will filter all blobs between 40 and 100 pixel².
 	 * @param methodName Getter method of the blob feature (double as return value).
 	 * @param lowerLimit Lower limit for the feature to filter blobs.
@@ -194,12 +196,13 @@ public class ManyBlobs extends ArrayList<Blob> {
 			}
 		} catch (NoSuchMethodException e) {
 			IJ.log("Method not found: " + e.getMessage());
+			e.printStackTrace();
 		} catch (SecurityException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
+			throw new IllegalArgumentException("Method " + methodName + " was called with wrong types of parameters");
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		}

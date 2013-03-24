@@ -40,8 +40,8 @@ public class FeatureTest {
 		int a  = 10;
 		double c = 1.5;
 		int featurevalue = (Integer)mb.get(0).evaluateCustomFeature("mySecondFancyFeature",a,c);
-		double diff = mb.get(0).getEnclosedArea()-featurevalue;
-		assertEquals(-(c*a-1)*mb.get(0).getEnclosedArea(), diff,0);
+		double diff = mb.get(0).getAreaToPerimeterRatio()-featurevalue;
+		assertEquals(-(c*a-1)*mb.get(0).getAreaToPerimeterRatio(), diff,0.5);
 	}
 	
 	@Test
@@ -52,9 +52,25 @@ public class FeatureTest {
 		mb.findConnectedComponents();
 		ExampleBlobFeature test = new ExampleBlobFeature();
 		Blob.addCustomFeature(test);
-		ManyBlobs filtered = mb.filterBlobs(6, "myThirdFancyFeature");
+		int a = 10;
+		double b = 20;
+		ManyBlobs filtered = mb.filterBlobs(6, "myFourthFancyFeature",a,b);
 		assertEquals(filtered.size(), 0,0);
 	}
+	
+	@Test (expected=IllegalArgumentException.class)
+	public void testFilterCustomBlobFeatureWrongArgument() {
+		URL url = this.getClass().getResource("circle_r30.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.findConnectedComponents();
+		ExampleBlobFeature test = new ExampleBlobFeature();
+		Blob.addCustomFeature(test);
+		int a = 10;
+		int b = 20;
+		mb.filterBlobs(6, "myFourthFancyFeature",a,b);
+	}
+	
 	
 	@Test
 	public void testFilterCustomBlobFeature2() {

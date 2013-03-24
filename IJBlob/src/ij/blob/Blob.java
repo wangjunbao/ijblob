@@ -84,7 +84,7 @@ public class Blob {
 	
 	/**
 	 * Evaluates the Custom Feature and return its value
-	 * @param methodname The method name of the method in the feature class
+	 * @param Method name The method name of the method in the feature class
 	 * @param params the parameters of the method specified by the method name
 	 */
 	public Object evaluateCustomFeature(String methodName, Object... params) {
@@ -215,6 +215,7 @@ public class Blob {
 	 * @return Geometric center of gravity of the blob
 	 */
 	public Point getCenterOfGravity() {
+		
 		if(centerOfGrafity != null){
 			return centerOfGrafity;
 		}
@@ -224,7 +225,8 @@ public class Blob {
 	    int[] y = outerContour.ypoints;
 	    int sumx = 0;
 	    int sumy = 0;
-
+	    double A = 0;
+/*
 	    if(outerContour.npoints < 4){
 	    	for(int i = 0; i < outerContour.npoints; i++) {
 	    		sumx = sumx + x[i];
@@ -234,21 +236,25 @@ public class Blob {
 		    centerOfGrafity.y = (int)(sumy/(outerContour.npoints));
 	    }
 	    else{
+	    */
 	    	for(int i = 0; i < outerContour.npoints-1; i++){
 	    		int cross = (x[i]*y[i+1]-x[i+1]*y[i]);
 	    		sumx = sumx + (x[i]+x[i+1])*cross;
 	    		sumy = sumy + (y[i]+y[i+1])*cross;
+	    		A = A + x[i]*y[i+1]-x[i+1]*y[i];
 	    	}
-	    	centerOfGrafity.x = (int)(sumx/(6*getEnclosedArea()));
-		    centerOfGrafity.y = (int)(sumy/(6*getEnclosedArea()));
-	    }
+	    	A = 0.5*A;
+	    	centerOfGrafity.x = (int)(sumx/(6*A));
+		    centerOfGrafity.y = (int)(sumy/(6*A));
+	    //}
 	    
 		return centerOfGrafity;
+		
 		
 	}
 	
 	/**
-	 * Methodname of getFeretDiameter (for filtering).
+	 * Method name of getFeretDiameter (for filtering).
 	 */
 	public final static String GETFERETDIAMETER = "getFeretDiameter";
 	/**
@@ -445,7 +451,7 @@ public class Blob {
 	}
 	
 	/**
-	 * Methodname of getElongation (for filtering).
+	 * Method name of getElongation (for filtering).
 	 */
 	public final static String GETELONGATION = "getElongation";
 	/**
@@ -613,6 +619,9 @@ public class Blob {
 		return label;
 	}
 	
+	/**
+	 * Method name of getPerimeter (for filtering).
+	 */
 	public final static String GETPERIMETER = "getPerimeter";
 	/**
 	 * Calculates the perimeter of the outer contour using its chain code
@@ -676,7 +685,7 @@ public class Blob {
 	}
 	
 	/**
-	 * Methodname of getPerimeterConvexHull (for filtering).
+	 * Method name of getPerimeterConvexHull (for filtering).
 	 */
 	public final static String GETPERIMETERCONVEXHULL = "getPerimeterConvexHull";
 	/**
@@ -717,7 +726,7 @@ public class Blob {
 	}
 	
 	/**
-	 * Methodname of getEnclosedArea (for filtering).
+	 * Method name of getEnclosedArea (for filtering).
 	 */
 	public final static String GETENCLOSEDAREA = "getEnclosedArea";
 	/**
@@ -773,7 +782,7 @@ public class Blob {
 	}
 	
 	/**
-	 * Methodname of getCircularity (for filtering).
+	 * Method name of getCircularity (for filtering).
 	 */
 	public final static String GETCIRCULARITY = "getCircularity";
 	/**
@@ -790,7 +799,7 @@ public class Blob {
 		return circularity;
 	}
 	/**
-	 * Methodname of getThinnesRatio (for filtering).
+	 * Method name of getThinnesRatio (for filtering).
 	 */
 	public final static String GETTHINNESRATIO = "getThinnesRatio";
 	/**
@@ -807,7 +816,7 @@ public class Blob {
 	}
 	
 	/**
-	 * Methodname of getAreaToPerimeterRatio (for filtering).
+	 * Method name of getAreaToPerimeterRatio (for filtering).
 	 */
 	public final static String GETAREATOPERIMETERRATIO = "getAreaToPerimeterRatio";
 	/**
@@ -823,7 +832,7 @@ public class Blob {
 	}
 	
 	/**
-	 * Methodname of getContourTemperature (for filtering).
+	 * Method name of getContourTemperature (for filtering).
 	 */
 	public final static String GETCONTOURTEMPERATURE = "getContourTemperature";
 	/**
@@ -860,7 +869,7 @@ public class Blob {
 	}
 	
 	/**
-	 * Methodname of getContourTemperature (for filtering).
+	 * Method name of getContourTemperature (for filtering).
 	 */
 	public final static String GETFRACTALBOXDIMENSION = "getFractalBoxDimension";
 	/**
@@ -886,7 +895,7 @@ public class Blob {
 	}
 	
 	/**
-	 * Methodname of GETNUMBEROFHOLES (for filtering).
+	 * Method name of getNumberofHoles (for filtering).
 	 */
 	public final static String GETNUMBEROFHOLES = "getNumberofHoles";
 	/**
