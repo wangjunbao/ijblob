@@ -26,8 +26,47 @@ public class ManyBlobsTest {
 		ManyBlobs mb = new ManyBlobs(ip);
 		mb.findConnectedComponents();
 		ManyBlobs t = mb.filterBlobs(0.9, Blob.GETTHINNESRATIO);
-		
 		assertEquals(1, t.size(),0);
+	}
+	
+	@Test
+	public void testBlobsOnBorder() {
+		URL url = this.getClass().getResource("squaresOnBoarder.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.findConnectedComponents();
+		assertEquals(4, mb.size(),0);
+	}
+	
+	@Test
+	public void testBlobsOnBorderInverted() {
+		URL url = this.getClass().getResource("squaresOnBoarderInv.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.setBackground(0);
+		mb.findConnectedComponents();
+		assertEquals(4, mb.size(),0);
+	}
+	
+	@Test 
+	public void testBlackBackground() {
+		URL url = this.getClass().getResource("3blobs.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ip.getProcessor().invert();
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.setBackground(0);
+		mb.findConnectedComponents();
+		assertEquals(3, mb.size(),0);
+	}
+	
+	@Test
+	public void testBlobOnBorder_right() {
+		
+		URL url = this.getClass().getResource("squareOnBoarder_right.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.findConnectedComponents();
+		assertEquals(1, mb.size(),0);
 	}
 	
 	@Test (expected=RuntimeException.class)

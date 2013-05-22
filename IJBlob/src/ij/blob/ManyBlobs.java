@@ -62,7 +62,27 @@ public class ManyBlobs extends ArrayList<Blob> {
 		setImage(imp);
 	}
 	
-	
+	/**
+	 * Mutator to modify the background target. This method will switch
+	 * the background to the user's specification and also swap the OBJECT
+	 * value to be the opposite. e.g. If the users specifies the background
+	 * to be black, the objects (blobs) looked for will be white.
+	 
+	 * @param backgroundVal : 0 or 1 (black/white respectively)
+	 */
+	public void setBackground(int val){
+		if(val > 1)
+			throw new IllegalArgumentException("Value must be 0 or 1 (black/white respectively)");
+		
+		if(val == 0){
+			BACKGROUND = val;
+			OBJECT = 255;
+		}
+		else {
+			BACKGROUND = 255;
+			OBJECT = 0;
+		}
+	}
 	
 	private void setImage(ImagePlus imp) {
 		this.imp = imp;
@@ -71,7 +91,7 @@ public class ManyBlobs extends ArrayList<Blob> {
 		if ((stats.histogram[0] + stats.histogram[255]) != stats.pixelCount) {
 			throw new java.lang.IllegalArgumentException("Not a binary image");
 		}
-		
+	
 		if(imp.isInvertedLut()){
 			//BACKGROUND = 0;
 		//	OBJECT = 255;

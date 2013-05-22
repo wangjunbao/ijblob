@@ -19,12 +19,15 @@ package ij.blob;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.gui.NewImage;
+import ij.gui.Toolbar;
 import ij.plugin.CanvasResizer;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
@@ -45,7 +48,7 @@ class ConnectedComponentLabeler {
 	private int OBJECT = 0;
 	private ManyBlobs allBlobs;
 	/*
-	 * Die Reihenfolge, wie das 3x3 Fester um den Punkt p durchlaufen wird.
+	 * Die Reihenfolge, wie das 3x3 Fenster um den Punkt p durchlaufen wird.
 	 * Fenster:
 	 * 5 * 6 * 7 
 	 * 4 * p * 0 
@@ -62,6 +65,7 @@ class ConnectedComponentLabeler {
 		this.imp = imp;
 		this.BACKGROUND = BACKGROUND;
 		this.OBJECT = OBJECT;
+		
 
 		addWhiteBorder(imp);
 
@@ -80,8 +84,10 @@ class ConnectedComponentLabeler {
 		ByteProcessor proc = (ByteProcessor) ip;
 		byte[] pixels = (byte[]) proc.getPixels();
 		int w = proc.getWidth();
+		IJ.log("W:" + w);
+		IJ.log("H:" + proc.getHeight());
 		Rectangle roi = ip.getRoi();
-		double value;
+		int value;
 		for (int i = roi.y; i < roi.y + roi.height; ++i) {
 			int offset = i * w;
 			for (int j = roi.x; j < roi.x + roi.width; ++j) {
@@ -92,7 +98,7 @@ class ConnectedComponentLabeler {
 						labledImage.set(j, i, labelCount);
 						Polygon outerContour = traceContour(j, i, proc,
 								labelCount, 1);
-						
+						IJ.log("X:" + j);
 						allBlobs.add(new Blob(outerContour, labelCount));
 						++labelCount;
 
@@ -134,7 +140,7 @@ class ConnectedComponentLabeler {
 			for (int j = 0; j < w; ++j) {
 				value = pixels[offset + j];
 				if(value==-1){
-					pixels[offset + j] = 0;
+					pixels[offset + j] = BACKGROUND;
 				}
 			}
 		}
@@ -149,7 +155,7 @@ class ConnectedComponentLabeler {
 		contour.addPoint(x, y);
 
 		Point nextPoint = nextPointOnContour(startPoint, proc, start);
-		Point T = nextPointOnContour(startPoint, proc, start);
+		Point T =  new Point(nextPoint.x,nextPoint.y);
 		if (nextPoint.x == -1) {
 			// Point is isolated;
 			return contour;
@@ -170,7 +176,7 @@ class ConnectedComponentLabeler {
 
 	// start = 1 -> External Contour
 	// start = 2 -> Internal Contour
-	private Point nextPointOnContour(Point startPoint, ByteProcessor proc,
+	private final Point nextPointOnContour(Point startPoint, ByteProcessor proc,
 			int start) {
 
 		/*
@@ -188,7 +194,7 @@ class ConnectedComponentLabeler {
 
 		int I = 2;
 		int k = I - 1;
-
+		
 		int u = 0;
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
@@ -308,10 +314,16 @@ class ConnectedComponentLabeler {
 				i = oldproc.getHeight(); // Stop searching
 			}
 		}
-
+		//hasWhiteBorder=false;
 		if (!hasWhiteBorder) 
 		{
 			CanvasResizer resizer = new CanvasResizer();
+
+			if(BACKGROUND==255){
+				Toolbar.setBackgroundColor(Color.WHITE);
+			}else{
+				Toolbar.setBackgroundColor(Color.BLACK);
+			}
 			img.setProcessor(resizer.expandImage(img.getProcessor(), img.getWidth()+2, img.getHeight()+2, 1, 1));
 		} else
 		{

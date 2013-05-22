@@ -132,10 +132,30 @@ public class FeatureTest {
 		assertEquals(area, mb.get(0).getEnclosedArea(),10);
 		
 	}
+	
+	@Test
+	public void testFilterEnclosedAreaSqaures() {
+		URL url = this.getClass().getResource("squares_20x20_30x30.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		int areaSmallSquare = (19*19);
+		int areaBigSquare = (29*29);
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.findConnectedComponents();
+		ManyBlobs filter = mb.filterBlobs(areaSmallSquare+1, Blob.GETENCLOSEDAREA);
+		assertEquals(4, filter.size(),0);
+		filter = mb.filterBlobs(areaBigSquare+1, Blob.GETENCLOSEDAREA);
+		assertEquals(0, filter.size(),0);
+	}
 
 	@Test
 	public void testGetCircularity() {
-		fail("Not yet implemented");
+		URL url = this.getClass().getResource("circle_r30.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.findConnectedComponents();
+		
+		double expectedCircularity = 4*Math.PI;
+		assertEquals(expectedCircularity, mb.get(0).getCircularity(),0.1);
 		
 	}
 
@@ -180,21 +200,32 @@ public class FeatureTest {
 	
 	@Test
 	public void testGetOuterContourIsCorrect() {
-		URL url = this.getClass().getResource("correctcontour.png");
-		ImagePlus ip = new ImagePlus(url.getPath());
-		ManyBlobs mb = new ManyBlobs(ip);
-		mb.findConnectedComponents();
-		
-		int[] xp = {3,4,5,6,7,8,9,10,11,11,11,10,9,8,7,6,5,4,3,2,2,2,3};
-		int[] yp = {1,1,2,2,2,1,1,2,2,3,4,4,5,5,4,4,4,5,5,4,3,2,1};
-		
-		Polygon contour = mb.get(0).getOuterContour();
-		
-		int diff=0;
-		for(int i = 0; i < contour.npoints; i++){
-			diff += Math.abs(contour.xpoints[i] - xp[i]) + Math.abs(contour.ypoints[i] - yp[i]);
-		}
-		assertEquals(0,diff,0);
+        //Pfad des Beispielbildes
+        URL url = this.getClass().getResource("correctcontour.png");
+        //Lade das Beispielbild
+        ImagePlus ip = new ImagePlus(url.getPath());
+ 
+        //Analysiere die Blobs
+        ManyBlobs mb = new ManyBlobs(ip);
+       // mb.setBackground(0);
+        mb.findConnectedComponents();
+       
+        //Die Kontur die ermittelt werden sollte
+        int[] xp = {3,4,5,6,7,8,9,10,11,11,11,10,9,8,7,6,5,4,3,2,2,2,3};
+        int[] yp = {1,1,2,2,2,1,1,2,2,3,4,4,5,5,4,4,4,5,5,4,3,2,1};
+       
+        //Die Kontur die ermittelt wurde
+        Polygon contour = mb.get(0).getOuterContour();
+       
+        //Differenz der beiden Konturen
+        int diff=0;
+        for(int i = 0; i < contour.npoints; i++){
+        		IJ.log(""+contour.xpoints[i]);
+                diff += Math.abs(contour.xpoints[i] - xp[i]) + Math.abs(contour.ypoints[i] - yp[i]);
+        }
+       
+        //Überprüfe ob die Differenz 0 ergibt. Dann sind beide Konturen gleich.
+        assertEquals(0,diff,0);
 	}
 
 }

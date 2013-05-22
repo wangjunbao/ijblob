@@ -2,6 +2,7 @@ Changelog
 
 ==V 1.0.8==
 * Some Refactoring
+* Integrate Patch for setBackground() (Issue 2)
 
 ==V 1.0.7==
 * Add Getter: getLabeledImage();
