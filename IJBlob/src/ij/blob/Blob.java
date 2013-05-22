@@ -46,7 +46,9 @@ public class Blob {
 	public final static int DRAW_HOLES = 1;
 	public final static int DRAW_CONVEX_HULL = 2;
 	public final static int DRAW_LABEL = 4;
+	private static Color defaultColor = Color.black;
 	
+
 	private Polygon outerContour;
 	private ArrayList<Polygon> innerContours; //Holes
 	private int label;
@@ -80,6 +82,13 @@ public class Blob {
 	
 	public static void addCustomFeature(CustomBlobFeature feature) {
 		customFeatures.add(feature);
+	}
+	/**
+	 * Changes the default blob color.
+	 * @param defaultColor The default color.
+	 */
+	public static void setDefaultColor(Color defaultColor) {
+		Blob.defaultColor = defaultColor;
 	}
 	
 	/**
@@ -166,7 +175,7 @@ public class Blob {
 	 * @param options Drawing Options are DRAW_HOLES, DRAW_CONVEX_HULL, DRAW_LABEL. Combinations with | are possible.
 	 */
 	public void draw(ImageProcessor ip, int options){
-		draw(ip, options, Color.BLACK);
+		draw(ip, options, defaultColor);
 	}
 	
 	void draw(ImageProcessor ip, int options, int deltax, int deltay){

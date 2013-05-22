@@ -250,7 +250,7 @@ public class ManyBlobs extends ArrayList<Blob> {
 	 * the lowerLimit and lower than the upper limit.
 	 * For instance: filterBlobs(Blob.GETENCLOSEDAREA,40,100) will filter all blobs between 40 and 100 pixel².
 	 * @param methodName Getter method of the blob feature (double as return value).
-	 * @param limits First Element is the lower limit, secod element is the upper limit
+	 * @param limits First Element is the lower limit, second element is the upper limit
 	 * @return The filtered blobs.
 	 */
 	public ManyBlobs filterBlobs(double[] limits, String methodName, Object... methodparams){

@@ -84,8 +84,7 @@ class ConnectedComponentLabeler {
 		ByteProcessor proc = (ByteProcessor) ip;
 		byte[] pixels = (byte[]) proc.getPixels();
 		int w = proc.getWidth();
-		IJ.log("W:" + w);
-		IJ.log("H:" + proc.getHeight());
+		
 		Rectangle roi = ip.getRoi();
 		int value;
 		for (int i = roi.y; i < roi.y + roi.height; ++i) {
@@ -98,7 +97,7 @@ class ConnectedComponentLabeler {
 						labledImage.set(j, i, labelCount);
 						Polygon outerContour = traceContour(j, i, proc,
 								labelCount, 1);
-						IJ.log("X:" + j);
+					
 						allBlobs.add(new Blob(outerContour, labelCount));
 						++labelCount;
 
