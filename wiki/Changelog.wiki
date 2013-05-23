@@ -1,6 +1,13 @@
 #labels Featured
 =IJBlob=
 
+==V 1.1.1 23.05.2013==
+* ManyBlobs.java: A the feature for toggle the background/object color (black/white): setBackground() (Issue 2)
+* ManyBlobs.java: Add the feature for getting a blob which encompasses a point: getSpecificBlob(x,y) (Issue 3)
+* Some Refactoring
+* Minor Bugfixes
+
+
 ==V 1.1 07.03.2013==
 
   * Adding filter / extension framework
@@ -42,6 +49,11 @@
   * IJBlob works with LUT Inverted Images
 
 =Shape Filter=
+
+==V 1.0.8  23.05.2013==
+  * Add Option: Black backgrounds are now supported (new GUI checkbox)
+  * Add Option: Show color labeled image (new GUI checkbox)
+
 ==V 1.0.7 07.03.2013==
   * Code refactoring for IJBlob 1.1
 
