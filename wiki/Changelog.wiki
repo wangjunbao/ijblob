@@ -2,11 +2,10 @@
 =IJBlob=
 
 ==V 1.1.1 23.05.2013==
-  * (ManyBlobs.java): A the feature for toggle the background/object color (black/white): setBackground() (Issue 2)
-  * (ManyBlobs.java): Add the feature for getting a blob which encompasses a point: getSpecificBlob(x,y) (Issue 3)
+  * (`ManyBlobs.java`): A the feature for toggle the background/object color (black/white): setBackground() (Issue 2)
+  * (`ManyBlobs.java`): Add the feature for getting a blob which encompasses a point: getSpecificBlob(x,y) (Issue 3)
   * Some Refactoring
   * Minor Bugfixes
-
 
 ==V 1.1 07.03.2013==
 
