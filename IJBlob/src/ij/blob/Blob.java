@@ -111,6 +111,7 @@ public class Blob {
 			}
 			if(methodfound){break;}
 		}
+		@SuppressWarnings("rawtypes")
 		Class classparams[] = {};
 		if(params.length >0){
 			classparams = new Class[params.length];
@@ -362,26 +363,6 @@ public class Blob {
 		return centralMoment;
 	}
 	
-	private double getOrientation(){
-		double c00 = getCentralMoments(0, 0);
-		double c20 = getCentralMoments(2,0)/c00;
-		double c02 = getCentralMoments(0,2)/c00;
-		double c11 = getCentralMoments(1,1)/c00;
-		
-	
-		double tanalpha = 2.0*c11/(c20-c02);
-		double grad = -0.5*Math.atan(tanalpha)*(360.0/(2*Math.PI));
-	
-		//Negative Zero or positive zero?
-		if(1/grad == Double.NEGATIVE_INFINITY){
-			return 0;
-		}
-		else if(1/grad == Double.POSITIVE_INFINITY){
-			return 90;
-		}
-		return grad;
-	}
-	
 	/**
 	 * @return The Orientation of the Major Axis from the Blob in grad (measured counter clockwise from the positive x axis).
 	 */
@@ -391,6 +372,8 @@ public class Blob {
 		}
 		fitEllipse();
 		orientation = fittedEllipse.angle; 
+		Roi roi = new Roi(getOuterContour().getBounds());
+		
 		return orientation;
 	}
 	

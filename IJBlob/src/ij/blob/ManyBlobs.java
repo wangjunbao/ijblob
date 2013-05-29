@@ -25,6 +25,7 @@ import ij.process.ColorProcessor;
 import ij.process.ImageStatistics;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -91,7 +92,7 @@ public class ManyBlobs extends ArrayList<Blob> {
 		if ((stats.histogram[0] + stats.histogram[255]) != stats.pixelCount) {
 			throw new java.lang.IllegalArgumentException("Not a binary image");
 		}
-	
+		
 		if(imp.isInvertedLut()){
 			//BACKGROUND = 0;
 		//	OBJECT = 255;
@@ -126,6 +127,30 @@ public class ManyBlobs extends ArrayList<Blob> {
 		labeledImage = p;
 	}
 	
+	/**
+	 * Returns a specific {@link Blob} which encompasses a point
+	 * @param x x coordinate of the point
+	 * @param y y coordinate of the point
+	 * @return The blob which contains the point, otherwise null
+	 */
+	public Blob getSpecificBlob(int x, int y){
+		
+		   for(int i = 0; i < this.size(); i++){
+		       if(this.get(i).getOuterContour().contains(x, y)){
+		    	   return this.get(i);
+		       }
+		   }
+		   return null;
+	}
+	
+	/**
+	 * Returns a specific blob which encompasses a point
+	 * @return The blob which contains the point, otherwise null
+	 */
+	public Blob getSpecificBlob(Point p){
+		   return getSpecificBlob(p.x,p.y);
+	}
+
 	
 	/**
 	 * Filter all blobs which feature (specified by the methodName) is higher than 
@@ -139,6 +164,7 @@ public class ManyBlobs extends ArrayList<Blob> {
 	public ManyBlobs filterBlobs(double lowerLimit, double upperLimit, String methodName, Object... methodparams){
 		ManyBlobs blobs = new ManyBlobs();
 		blobs.setImage(imp);
+		@SuppressWarnings("rawtypes")
 		Class classparams[] = {};
 		if(methodparams.length >0){
 			classparams = new Class[methodparams.length];

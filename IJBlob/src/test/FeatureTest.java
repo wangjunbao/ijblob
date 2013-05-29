@@ -220,7 +220,6 @@ public class FeatureTest {
         //Differenz der beiden Konturen
         int diff=0;
         for(int i = 0; i < contour.npoints; i++){
-        		IJ.log(""+contour.xpoints[i]);
                 diff += Math.abs(contour.xpoints[i] - xp[i]) + Math.abs(contour.ypoints[i] - yp[i]);
         }
        

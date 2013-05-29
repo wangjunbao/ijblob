@@ -60,6 +60,26 @@ public class ManyBlobsTest {
 	}
 	
 	@Test
+	public void testGetSpecificBlobNotFound() {
+		URL url = this.getClass().getResource("squares_20x20_30x30.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.findConnectedComponents();
+		Blob resultBlob = mb.getSpecificBlob(125, 84);
+		assertEquals(null, resultBlob);
+	}
+	
+	@Test
+	public void testGetSpecificBlob() {
+		URL url = this.getClass().getResource("squares_20x20_30x30.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.findConnectedComponents();
+		Blob resultBlob = mb.getSpecificBlob(21, 41);
+		assertEquals(mb.get(0), resultBlob);
+	}
+	
+	@Test
 	public void testBlobOnBorder_right() {
 		
 		URL url = this.getClass().getResource("squareOnBoarder_right.tif");

@@ -19,8 +19,6 @@ package ij.blob;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.Prefs;
-import ij.gui.NewImage;
 import ij.gui.Toolbar;
 import ij.plugin.CanvasResizer;
 import ij.process.ByteProcessor;
@@ -93,7 +91,7 @@ class ConnectedComponentLabeler {
 				value = pixels[offset + j] & 255;
 				if (value == OBJECT) {
 					if (isNewExternalContour(j, i, proc) && hasNoLabel(j, i)) {
-						
+			
 						labledImage.set(j, i, labelCount);
 						Polygon outerContour = traceContour(j, i, proc,
 								labelCount, 1);
@@ -101,18 +99,26 @@ class ConnectedComponentLabeler {
 						allBlobs.add(new Blob(outerContour, labelCount));
 						++labelCount;
 
-					} else if (isNewInternalContour(j, i, proc)) {
-				
+					}
+					if (isNewInternalContour(j, i, proc)) {
+						IJ.log("Intern");
 						int label = labledImage.get(j, i);
 						if (hasNoLabel(j, i)) {
-							label = labledImage.get(j - 1, i);
+							IJ.log("NOLABEL");
+							//printImage(labledImage);
+							label = labledImage.get(j-1, i);
 							labledImage.set(j, i, label);
 
 						}
+						try{
 						Polygon innerContour = traceContour(j, i, proc, label,
 								2);
 
 						getBlobByLabel(label).addInnerContour(innerContour);
+						}catch(Exception e){
+						  
+							IJ.log("x " + j + " y " +i + " label " + label);
+						}
 
 					} else if (hasNoLabel(j, i)) {
 					
@@ -123,9 +129,29 @@ class ConnectedComponentLabeler {
 				}
 			}
 		}
-		// printImage(labledImage);
+		//printImage(labledImage);
 	}
 	
+	private void printImage(ImageProcessor img){
+		System.out.println("=================");
+		ImageProcessor proc = img;
+		
+		for(int y = 0; y < proc.getHeight(); y++){
+			String oneline="";
+			int numberSpaces = 0;
+			for(int x = 0; x < proc.getWidth(); x++){
+				String pixel = "" + proc.getPixel(x, y);
+				
+				for(int i = 0; i < numberSpaces; i++){
+					oneline += " ";
+				}
+				oneline += "" + pixel;
+				numberSpaces = 8-pixel.length()%8;
+			}
+			System.out.println(oneline);
+		   
+		}
+	}
 
 	public ImagePlus getLabledImage() {
 		ImagePlus img = new ImagePlus("Labeled", labledImage);
@@ -154,12 +180,12 @@ class ConnectedComponentLabeler {
 		contour.addPoint(x, y);
 
 		Point nextPoint = nextPointOnContour(startPoint, proc, start);
-		Point T =  new Point(nextPoint.x,nextPoint.y);
+		
 		if (nextPoint.x == -1) {
 			// Point is isolated;
 			return contour;
 		}
-
+		Point T =  new Point(nextPoint.x,nextPoint.y);
 		boolean equalsStartpoint = false;
 		do {
 			contour.addPoint(nextPoint.x, nextPoint.y);
@@ -224,17 +250,20 @@ class ConnectedComponentLabeler {
 			break;
 		case STARTINTERNALCONTOUR:
 			start = 3;
+	
 			break;
 		}
 
 		int counter = start;
 		int pos = -2;
 
+		Point returnPoint = null;
 		while (pos != start) {
 			pos = counter % 8;
 			if (neighbors[pos] == OBJECT) {
 				prevContourPoint = startPoint;
-				return indexToPoint.get(pos);
+				returnPoint = indexToPoint.get(pos);
+				return returnPoint;
 			}
 			Point p = indexToPoint.get(pos);
 			if (neighbors[pos] == BACKGROUND) {
@@ -248,8 +277,8 @@ class ConnectedComponentLabeler {
 			counter++;
 			pos = counter % 8;
 		}
+		
 		Point isIsolated = new Point(-1, -1);
-
 		return isIsolated;
 	}
 

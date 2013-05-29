@@ -1,10 +1,12 @@
 Changelog
 
-==V 1.0.8==
+==V 1.1.1==
+* ManyBlobs.java: A the feature for toggle the background/object color (black/white): setBackground() (Issue 2)
+* ManyBlobs.java: Add the feature for getting a blob which encompasses a point: getSpecificBlob(x,y) (Issue 3)
 * Some Refactoring
-* Integrate Patch for setBackground() (Issue 2)
+* Minor Bugfixes
 
-==V 1.0.7==
+==V 1.1==
 * Add Getter: getLabeledImage();
 * Add Blob Filter: ManyBlobs.filterBlobs();
 * Remove some unnecessary library dependencies.
