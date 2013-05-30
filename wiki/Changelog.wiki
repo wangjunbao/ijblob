@@ -1,6 +1,9 @@
 #labels Featured
 =IJBlob=
 
+==V 1.1.1a 30.05.2013==
+  * Fix a NullPointerException which occurs if a pixel belongs to an internal and to an external contour. (Issue 4)
+
 ==V 1.1.1 23.05.2013==
   * (`ManyBlobs.java`): A the feature for toggle the background/object color (black/white): setBackground() (Issue 2)
   * (`ManyBlobs.java`): Add the feature for getting a blob which encompasses a point: getSpecificBlob() (Issue 3)
@@ -48,6 +51,9 @@
   * IJBlob works with LUT Inverted Images
 
 =Shape Filter=
+
+==V 1.0.8a 30.05.2013==
+  * Fix a NullPointerException which occurs if a pixel belongs to an internal and to an external contour. (Issue 4)
 
 ==V 1.0.8  23.05.2013==
   * Add Option: Black backgrounds are now supported (new GUI checkbox)
