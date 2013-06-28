@@ -88,14 +88,12 @@ public class ManyBlobs extends ArrayList<Blob> {
 	private void setImage(ImagePlus imp) {
 		this.imp = imp;
 		ImageStatistics stats = imp.getStatistics();
-
-		if ((stats.histogram[0] + stats.histogram[255]) != stats.pixelCount) {
-			throw new java.lang.IllegalArgumentException("Not a binary image");
-		}
 		
-		if(imp.isInvertedLut()){
-			//BACKGROUND = 0;
-		//	OBJECT = 255;
+		boolean notBinary = (stats.histogram[0] + stats.histogram[255]) != stats.pixelCount;
+		boolean toManyChannels = (imp.getNChannels()>1);
+		boolean wrongBitDepth = (imp.getBitDepth()!=8);
+		if (notBinary | toManyChannels | wrongBitDepth) {
+			throw new java.lang.IllegalArgumentException("Wrong Image Format. IJ Blob only supports 8-bit, single-channel binary images");
 		}
 	}
 	

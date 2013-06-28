@@ -89,7 +89,9 @@ class ConnectedComponentLabeler {
 			int offset = i * w;
 			for (int j = roi.x; j < roi.x + roi.width; ++j) {
 				value = pixels[offset + j] & 255;
+			
 				if (value == OBJECT) {
+					
 					if (isNewExternalContour(j, i, proc) && hasNoLabel(j, i)) {
 			
 						labledImage.set(j, i, labelCount);
@@ -101,10 +103,8 @@ class ConnectedComponentLabeler {
 
 					}
 					if (isNewInternalContour(j, i, proc)) {
-						IJ.log("Intern");
 						int label = labledImage.get(j, i);
 						if (hasNoLabel(j, i)) {
-							IJ.log("NOLABEL");
 							//printImage(labledImage);
 							label = labledImage.get(j-1, i);
 							labledImage.set(j, i, label);
@@ -348,9 +348,11 @@ class ConnectedComponentLabeler {
 			CanvasResizer resizer = new CanvasResizer();
 
 			if(BACKGROUND==255){
-				Toolbar.setBackgroundColor(Color.WHITE);
+				Color bgcolor = (img.isInvertedLut()) ? Color.BLACK : Color.WHITE;
+				Toolbar.setBackgroundColor(bgcolor);
 			}else{
-				Toolbar.setBackgroundColor(Color.BLACK);
+				Color bgcolor = (img.isInvertedLut()) ? Color.WHITE : Color.BLACK;
+				Toolbar.setBackgroundColor(bgcolor);
 			}
 			img.setProcessor(resizer.expandImage(img.getProcessor(), img.getWidth()+2, img.getHeight()+2, 1, 1));
 		} else

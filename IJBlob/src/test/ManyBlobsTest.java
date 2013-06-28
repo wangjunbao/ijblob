@@ -100,5 +100,18 @@ public class ManyBlobsTest {
 		ManyBlobs t = new ManyBlobs();
 		t.findConnectedComponents();
 	}
+	
+	@Test
+	public void testComplexImageNoException() {
+		URL url = this.getClass().getResource("complexImage.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ManyBlobs mb = new ManyBlobs(ip);
+		try{
+			mb.findConnectedComponents();
+		}
+		catch(Exception ex){
+			assertEquals("Error on complex image: " + ex.getMessage(),false,true);
+		}
+	}
 
 }
