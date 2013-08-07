@@ -46,8 +46,9 @@ class ConnectedComponentLabeler {
 	private int OBJECT = 0;
 	private ManyBlobs allBlobs;
 	/*
-	 * Die Reihenfolge, wie das 3x3 Fenster um den Punkt p durchlaufen wird.
-	 * Fenster:
+	 * 
+	 * The read-order of the neighberhood of p.
+	 *
 	 * 5 * 6 * 7 
 	 * 4 * p * 0 
 	 * 3 * 2 * 1 
@@ -321,7 +322,7 @@ class ConnectedComponentLabeler {
 		for (int i = 0; i < oldproc.getHeight(); i++) {
 			
 			int offset = i * w;
-			//Erste und letzte Scanrow
+			//First and last Scanrow
 			if (i == 0 || i == oldproc.getHeight()-1) {
 
 				for (int j = 0; j < oldproc.getWidth(); j++) {
@@ -331,7 +332,7 @@ class ConnectedComponentLabeler {
 					}
 				}
 			}
-			// Erster und letzter Pixel pro Scanrow
+			// First and last Pixel per scan row
 			int firstvalue = pixels[offset + 0] & 255;
 			int lastvalue = pixels[offset + oldproc.getWidth() - 1] & 255;
 			if (firstvalue == OBJECT || lastvalue == OBJECT) {

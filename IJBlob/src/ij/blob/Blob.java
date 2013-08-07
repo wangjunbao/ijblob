@@ -69,6 +69,9 @@ public class Blob {
 	private double eigenMajor = -1;
 	private double eigenMinor = -1;
 	private double orientation = -1;
+	private double convexity = -1;
+	private double solidity = -1;
+	private double areaConvexHull = -1;
 	private double[][] centralMomentsLUT = {{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
 	private double[][] momentsLUT = {{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
 	EllipseFitter fittedEllipse = null;
@@ -236,28 +239,17 @@ public class Blob {
 	    int sumx = 0;
 	    int sumy = 0;
 	    double A = 0;
-/*
-	    if(outerContour.npoints < 4){
-	    	for(int i = 0; i < outerContour.npoints; i++) {
-	    		sumx = sumx + x[i];
-	    		sumy = sumy + y[i];
-	    	}
-	    	centerOfGrafity.x = (int)(sumx/(outerContour.npoints));
-		    centerOfGrafity.y = (int)(sumy/(outerContour.npoints));
+
+	    for(int i = 0; i < outerContour.npoints-1; i++){
+	    	int cross = (x[i]*y[i+1]-x[i+1]*y[i]);
+	    	sumx = sumx + (x[i]+x[i+1])*cross;
+	    	sumy = sumy + (y[i]+y[i+1])*cross;
+	    	A = A + x[i]*y[i+1]-x[i+1]*y[i];
 	    }
-	    else{
-	    */
-	    	for(int i = 0; i < outerContour.npoints-1; i++){
-	    		int cross = (x[i]*y[i+1]-x[i+1]*y[i]);
-	    		sumx = sumx + (x[i]+x[i+1])*cross;
-	    		sumy = sumy + (y[i]+y[i+1])*cross;
-	    		A = A + x[i]*y[i+1]-x[i+1]*y[i];
-	    	}
-	    	A = 0.5*A;
-	    	centerOfGrafity.x = (int)(sumx/(6*A));
-		    centerOfGrafity.y = (int)(sumy/(6*A));
-	    //}
-	    
+	    A = 0.5*A;
+	    centerOfGrafity.x = (int)(sumx/(6*A));
+		centerOfGrafity.y = (int)(sumy/(6*A));
+
 		return centerOfGrafity;
 		
 		
@@ -357,8 +349,7 @@ public class Blob {
 		
 			
 		}
-		//IJ.log(""+p+","+q+": " + centralMoment);
-		//IJ.log("CMOM "+p+","+q+" L" + getLabel() + " :" + centralMoment);
+
 		centralMomentsLUT[p][q] = centralMoment;
 		return centralMoment;
 	}
@@ -393,14 +384,7 @@ public class Blob {
 		double c20 = getCentralMoments(2,0)/c00;
 		double c02 = getCentralMoments(0,2)/c00;
 		double c11 = getCentralMoments(1,1)/c00;
-		/*
-		int sign = 1;
-		if(!major){
-			sign = -1;
-		}
-		double value = 0.5*(c20+c02)+sign*0.5*Math.sqrt(4*Math.pow(c11, 2)+Math.pow(c20-c02, 2));
-		*/
-		
+
 		double valuea = 0.5*(c20+c02)+0.5*Math.sqrt(4*Math.pow(c11, 2)+Math.pow(c20-c02, 2));
 		double valueb = 0.5*(c20+c02)-0.5*Math.sqrt(4*Math.pow(c11, 2)+Math.pow(c20-c02, 2));
 		double value = valuea;
@@ -446,6 +430,7 @@ public class Blob {
 	 * Method name of getElongation (for filtering).
 	 */
 	public final static String GETELONGATION = "getElongation";
+	
 	/**
 	 * The Elongation of the Blob based on a fitted ellipse (1 - minor axis / major axis)
 	 * @return The Elongation (normed between 0 and 1)
@@ -458,8 +443,6 @@ public class Blob {
 		elongation = 1- fittedEllipse.minor/fittedEllipse.major;
 		elongation = Math.sqrt(elongation);
 
-	//	fillPolygon(ip, p, false);
-	//	help.show();
 		return elongation;
 	}
 	
@@ -481,82 +464,6 @@ public class Blob {
 		}
 		
 	}
-	
-	/*
-	 * Calculates the first k Fourier Descriptor
-	 * @return Array with k Elements which are the k first Fourier Descriptors of the contour.
-	 */
-	/*
-	private double[] getFirstKFourierDescriptors(int k) {
-	
-		
-		 * a[2*k] = Re[k], 
-		 * a[2*k+1] = Im[k], 0<=k<n
-		 
-		double[] contourSignal = new double[2*outerContour.npoints];
-	
-		int j = 0;
-		for(int i = 0; i < outerContour.npoints; i++) {
-			contourSignal[j] = outerContour.xpoints[i];
-			contourSignal[j+1] = outerContour.ypoints[i];
-			j=j+2;
-		}
-		DoubleFFT_1D ft = new DoubleFFT_1D(outerContour.npoints);
-		ft.complexForward(contourSignal);
-		IJ.log("OK: " + outerContour.npoints);
-		IJ.log("CS: " + contourSignal.length);
-		for(int i = 0; i < contourSignal.length; i++){
-		IJ.log(""+contourSignal[i]);
-		}
-
-
-		k=k*2;
-		double[] fds = new double[k];
-		for(int i = 0; i < k; i++){
-				fds[i] = contourSignal[i];
-		}
-		
-		return fds;
-	}
-*/
-	/*
-	private void filterContourByFirstKDescriptorsToContour(int k){
-		double[] fds = getFirstKFourierDescriptors(k);
-		DoubleFFT_1D ft = new DoubleFFT_1D(outerContour.npoints);
-		double[] contourSignal = new double[2*outerContour.npoints];
-		IJ.log("N: " + 2*outerContour.npoints);
-		for(int i = 0; i < contourSignal.length; i++){
-			if(i < k){
-			    contourSignal[i] = fds[i];
-			    IJ.log("Set " + i + ": " + fds[i]);
-			}
-			else if(i >= contourSignal.length - k){
-				contourSignal[i] = fds[contourSignal.length-i-1];
-				IJ.log("Set " + i + ": " + fds[contourSignal.length-i-1]);
-				int diff = contourSignal.length-i-1;
-				IJ.log("contourSignal.length-i: " + diff);
-			}
-			else
-			{
-				contourSignal[i] = 0;
-			}
-		}
-		ft.complexInverse(contourSignal, false);
-
-		int[] xpoints = new int[outerContour.npoints];
-		int[] ypoints = new int[outerContour.npoints];
-		
-		int j=0;
-		for(int i = 0; i < contourSignal.length; i=i+2) {
-			xpoints[j] = (int)( (1.0/(outerContour.npoints-1))* contourSignal[i]);
-			ypoints[j] = (int)((1.0/(outerContour.npoints-1)) * contourSignal[i+1]);
-			j++;
-		}
-		Polygon newContour = new Polygon(xpoints, ypoints, j);
-		outerContour = newContour;
-		
-	}
-	*/
 
 	private void fillPolygon(ImageProcessor ip, Polygon p, boolean internContour) {
 		PolygonRoi proi = new PolygonRoi(p, PolygonRoi.POLYGON);
@@ -583,7 +490,7 @@ public class Blob {
 	 * @return The outer contour as freeman chain code
 	 */
 	public int[] getOuterContourAsChainCode(){
-		return contourToChainCode();
+		return contourToChainCode(getOuterContour());
 	}
 	
 	
@@ -624,28 +531,33 @@ public class Blob {
 		if(perimeter!=-1){
 			return perimeter;
 		}
-		if(outerContour.npoints == 1)
+		
+		return getPerimeterOfContour(getOuterContour());
+	}
+	
+	private double getPerimeterOfContour(Polygon contour){
+		double peri = 0;
+		if(contour.npoints == 1)
 		{
-			perimeter=1;
-			return perimeter;
+			peri=1;
+			return peri;
 		}
-		int[] cc = contourToChainCode();
+		int[] cc = contourToChainCode(contour);
 		int sum_gerade= 0;
 		for(int i = 0; i < cc.length;i++){
 			if(cc[i]%2 == 0){
 				sum_gerade++;
 			}
 		}
-	
-		perimeter = sum_gerade*0.948 + (cc.length-sum_gerade)*1.340;
-		return perimeter;
+		peri = sum_gerade*0.948 + (cc.length-sum_gerade)*1.340;
+		return peri;
 	}
 	
-	private int[] contourToChainCode() {
-		int[] chaincode = new int[outerContour.npoints-1];
-		for(int i = 1; i <outerContour.npoints; i++){
-			int dx = outerContour.xpoints[i] - outerContour.xpoints[i-1];
-			int dy = outerContour.ypoints[i] - outerContour.ypoints[i-1];
+	private int[] contourToChainCode(Polygon contour) {
+		int[] chaincode = new int[contour.npoints-1];
+		for(int i = 1; i <contour.npoints; i++){
+			int dx = contour.xpoints[i] - contour.xpoints[i-1];
+			int dy = contour.ypoints[i] - contour.ypoints[i-1];
 			
 			if(dx==1 && dy==0){
 				chaincode[i-1] = 0;
@@ -680,6 +592,7 @@ public class Blob {
 	 * Method name of getPerimeterConvexHull (for filtering).
 	 */
 	public final static String GETPERIMETERCONVEXHULL = "getPerimeterConvexHull";
+	
 	/**
 	 * Calculates the perimeter of the convex hull
 	 * @return The perimeter of the convex hull
@@ -704,6 +617,43 @@ public class Blob {
 	}
 	
 	/**
+	 * Method name of getConvexity (for filtering).
+	 */
+	public final static String GETCONVEXITY = "getConvexity";
+	
+	/**
+	 * @return convex hull perimeter/actual perimeter
+	 */
+	public double getConvexity(){
+		if(convexity!=-1){
+			return convexity;
+		}
+		convexity = getPerimeterConvexHull()/getPerimeter();
+		if(convexity>1){
+			convexity=1;
+		}
+		return convexity;
+	}
+	
+	/**
+	 * Method name of getSolidity (for filtering).
+	 */
+	public final static String GETSOLIDITY = "getSolidity";
+	/**
+	 * @return area bound by actual perimeter/area bound by convex hull perimeter
+	 */
+	public double getSolidity() {
+		if(solidity!=-1){
+			return solidity;
+		}
+		solidity = getEnclosedArea()/getAreaConvexHull();
+		if(solidity>1){
+			solidity=1;
+		}
+		return solidity;
+	}
+	
+	/**
 	 * Returns the convex hull of the blob.
 	 * @return The convex hull as polygon
 	 */
@@ -717,19 +667,7 @@ public class Blob {
 		return hull;
 	}
 	
-	/**
-	 * Method name of getEnclosedArea (for filtering).
-	 */
-	public final static String GETENCLOSEDAREA = "getEnclosedArea";
-	/**
-	 * Calculates the enclosed are of the outer contour without subsctracting possible holes.
-	 * @return The enclosed area of the outer contour (without substracting the holes).
-	 */
-	public double getEnclosedArea() {
-		if(enclosedArea!=-1){
-			return enclosedArea;
-		}
-		int[] cc = contourToChainCode();
+	private double getAreaOfChainCode(int[] cc){
 		int B = 1;
 		double A = 0;
 		for(int i = 0; i < cc.length; i++){
@@ -765,12 +703,57 @@ public class Blob {
 				break;
 			}
 		}
-		enclosedArea=Math.abs(A);
-		//filterContourByFirstKDescriptorsToContour(5);
-		if(enclosedArea==0){
-			enclosedArea=1;
+		
+		double area = Math.abs(A);
+
+		if(area==0){
+			area=1;
 		}
+		return area;
+	}
+	
+	/**
+	 * Method name of getEnclosedArea (for filtering).
+	 */
+	public final static String GETENCLOSEDAREA = "getEnclosedArea";
+	/**
+	 * Calculates the enclosed are of the outer contour without subsctracting possible holes.
+	 * @return The enclosed area of the outer contour (without substracting the holes).
+	 */
+	public double getEnclosedArea() {
+		if(enclosedArea!=-1){
+			return enclosedArea;
+		}
+		int[] cc = contourToChainCode(getOuterContour());
+		enclosedArea = getAreaOfChainCode(cc);
 		return enclosedArea;
+	}
+	
+	
+	/**
+	 * Method name of getAreaConvexHull (for filtering).
+	 */
+	public final static String GETAREACONVEXHULL = "getAreaConvexHull";
+	/**
+	 * @return Area of the convex hull
+	 */
+	public double getAreaConvexHull(){
+		if(areaConvexHull!=-1){
+			return areaConvexHull;
+		}
+		Polygon polyPoints = getConvexHull();
+		int i, j, n = polyPoints.npoints;
+		areaConvexHull = 0;
+
+		for (i = 0; i < n; i++) {
+			j = (i + 1) % n;
+			areaConvexHull += polyPoints.xpoints[i] * polyPoints.ypoints[j];
+			areaConvexHull -= polyPoints.xpoints[j] * polyPoints.ypoints[i];
+		}
+		areaConvexHull /= 2.0;
+		areaConvexHull = Math.abs(areaConvexHull);
+		IJ.log("A " +areaConvexHull );
+		return areaConvexHull;
 	}
 	
 	/**
