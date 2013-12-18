@@ -48,20 +48,24 @@ public class ManyBlobs extends ArrayList<Blob> {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private ImagePlus imp = null;
+	private ImagePlus binaryImage = null;
 	private ImagePlus labeledImage = null;
 	private int BACKGROUND = 255;
 	private int OBJECT = 0;
 
 	public ManyBlobs() {
+
 	}
 	
 	/**
 	 * @param imp Binary Image
 	 */
-	public ManyBlobs(ImagePlus imp) {
-		setImage(imp);
+	public ManyBlobs(ImagePlus binaryImage) {
+		setImage(binaryImage);
 	}
+	
+
+	
 	
 	/**
 	 * Mutator to modify the background target. This method will switch
@@ -86,7 +90,7 @@ public class ManyBlobs extends ArrayList<Blob> {
 	}
 	
 	private void setImage(ImagePlus imp) {
-		this.imp = imp;
+		this.binaryImage = imp;
 		ImageStatistics stats = imp.getStatistics();
 		
 		boolean notBinary = (stats.histogram[0] + stats.histogram[255]) != stats.pixelCount;
@@ -102,10 +106,10 @@ public class ManyBlobs extends ArrayList<Blob> {
 	 * @see  F. Chang, A linear-time component-labeling algorithm using contour tracing technique, Computer Vision and Image Understanding, vol. 93, no. 2, pp. 206-220, 2004.
 	 */
 	public void findConnectedComponents() {
-		if(imp==null){
+		if(binaryImage==null){
 			throw new RuntimeException("Cannot run findConnectedComponents: No input image specified");
 		}
-		ConnectedComponentLabeler labeler = new ConnectedComponentLabeler(this,imp,BACKGROUND,OBJECT);
+		ConnectedComponentLabeler labeler = new ConnectedComponentLabeler(this,binaryImage,BACKGROUND,OBJECT);
 		labeler.doConnectedComponents();
 		labeledImage = labeler.getLabledImage();
 	}
@@ -161,7 +165,7 @@ public class ManyBlobs extends ArrayList<Blob> {
 	 */
 	public ManyBlobs filterBlobs(double lowerLimit, double upperLimit, String methodName, Object... methodparams){
 		ManyBlobs blobs = new ManyBlobs();
-		blobs.setImage(imp);
+		blobs.setImage(binaryImage);
 		@SuppressWarnings("rawtypes")
 		Class classparams[] = {};
 		if(methodparams.length >0){

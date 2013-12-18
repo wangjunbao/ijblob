@@ -19,6 +19,7 @@ package ij.blob;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.gui.Toolbar;
 import ij.plugin.CanvasResizer;
 import ij.process.ByteProcessor;
@@ -45,6 +46,7 @@ class ConnectedComponentLabeler {
 	private int BACKGROUND = 255;
 	private int OBJECT = 0;
 	private ManyBlobs allBlobs;
+	private boolean removeBorder = false;
 	/*
 	 * 
 	 * The read-order of the neighberhood of p.
@@ -98,6 +100,7 @@ class ConnectedComponentLabeler {
 						labledImage.set(j, i, labelCount);
 						Polygon outerContour = traceContour(j, i, proc,
 								labelCount, 1);
+						outerContour.translate(-1, -1);
 					
 						allBlobs.add(new Blob(outerContour, labelCount));
 						++labelCount;
@@ -114,7 +117,7 @@ class ConnectedComponentLabeler {
 						try{
 						Polygon innerContour = traceContour(j, i, proc, label,
 								2);
-
+						innerContour.translate(-1, -1);
 						getBlobByLabel(label).addInnerContour(innerContour);
 						}catch(Exception e){
 						  
@@ -129,6 +132,9 @@ class ConnectedComponentLabeler {
 
 				}
 			}
+		}
+		if(removeBorder){
+			removeBorder(imp);
 		}
 		//printImage(labledImage);
 	}
@@ -314,6 +320,7 @@ class ConnectedComponentLabeler {
 	}
 	
 	private void addWhiteBorder(ImagePlus img) {
+
 		boolean hasWhiteBorder = true;
 		ImageProcessor oldip = img.getProcessor();
 		ByteProcessor oldproc = (ByteProcessor) oldip;
@@ -346,20 +353,41 @@ class ConnectedComponentLabeler {
 		//hasWhiteBorder=false;
 		if (!hasWhiteBorder) 
 		{
+			removeBorder=true;
 			CanvasResizer resizer = new CanvasResizer();
-
+			Color oldbg = Toolbar.getBackgroundColor();
 			if(BACKGROUND==255){
 				Color bgcolor = (img.isInvertedLut()) ? Color.BLACK : Color.WHITE;
 				Toolbar.setBackgroundColor(bgcolor);
+
+				
 			}else{
 				Color bgcolor = (img.isInvertedLut()) ? Color.WHITE : Color.BLACK;
 				Toolbar.setBackgroundColor(bgcolor);
 			}
+
 			img.setProcessor(resizer.expandImage(img.getProcessor(), img.getWidth()+2, img.getHeight()+2, 1, 1));
+			Toolbar.setBackgroundColor(oldbg);
 		} else
 		{
 			imp = img;
 		}
+		
 	}
+	
+	public void removeBorder(ImagePlus img) {
+		CanvasResizer resizer = new CanvasResizer();
+/*
+		if(BACKGROUND==255){
+			Color bgcolor = (img.isInvertedLut()) ? Color.BLACK : Color.WHITE;
+			Toolbar.setBackgroundColor(bgcolor);
+		}else{
+			Color bgcolor = (img.isInvertedLut()) ? Color.WHITE : Color.BLACK;
+			Toolbar.setBackgroundColor(bgcolor);
+		}
+	*/
+		img.setProcessor(resizer.expandImage(img.getProcessor(), img.getWidth()-2, img.getHeight()-2, -1, -1));
+	}
+	
 
 }

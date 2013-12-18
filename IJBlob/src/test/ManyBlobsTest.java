@@ -34,6 +34,17 @@ public class ManyBlobsTest {
 		URL url = this.getClass().getResource("squaresOnBoarder.tif");
 		ImagePlus ip = new ImagePlus(url.getPath());
 		ManyBlobs mb = new ManyBlobs(ip);
+		
+		mb.findConnectedComponents();
+		assertEquals(4, mb.size(),0);
+	}
+	
+	@Test
+	public void testBlobsOnBorderInvertedLUT() {
+		URL url = this.getClass().getResource("squaresOnBoarder.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ip.getProcessor().invertLut();
+		ManyBlobs mb = new ManyBlobs(ip);
 		mb.findConnectedComponents();
 		assertEquals(4, mb.size(),0);
 	}

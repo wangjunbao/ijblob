@@ -27,6 +27,7 @@ public class FeatureTest {
 		double featurevalue = (Double)mb.get(0).evaluateCustomFeature("myFancyFeature",a,c);
 		double diff = mb.get(0).getEnclosedArea()-featurevalue;
 		assertEquals(-(c*a-1)*mb.get(0).getEnclosedArea(), diff,0);
+		
 	}
 	
 	@Test
@@ -91,8 +92,8 @@ public class FeatureTest {
 		ImagePlus ip = new ImagePlus(url.getPath());
 		ManyBlobs mb = new ManyBlobs(ip);
 		mb.findConnectedComponents();
-		int centerx = mb.get(0).getCenterOfGravity().x;
-		int centery = mb.get(0).getCenterOfGravity().y;
+		int centerx = (int)mb.get(0).getCenterOfGravity().getX();
+		int centery = (int)mb.get(0).getCenterOfGravity().getY();
 		double diff = Math.abs(48-centerx)+Math.abs(48-centery);
 		assertEquals(0, diff,0);
 	}

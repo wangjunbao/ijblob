@@ -31,6 +31,7 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.awt.geom.Point2D;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -54,7 +55,7 @@ public class Blob {
 	private int label;
 	
 	//Features
-	private Point  centerOfGrafity = null;
+	private Point2D  centerOfGrafity = null;
 	private double perimeter = -1;
 	private double perimeterConvexHull = -1;
 	private double enclosedArea = -1;
@@ -156,7 +157,13 @@ public class Blob {
 		
 		if((options&DRAW_HOLES)>0){
 			for(int i = 0; i < innerContours.size(); i++) {
-				ip.setColor(Color.WHITE);
+				if(defaultColor==Color.white){
+					ip.setColor(Color.BLACK);
+				}
+				else
+				{
+					ip.setColor(Color.white);
+				}
 				fillPolygon(ip, innerContours.get(i), true);
 			}
 		}
@@ -167,9 +174,9 @@ public class Blob {
 		}
 		
 		if((options&DRAW_LABEL)>0){
-			Point cog = getCenterOfGravity();
+			Point2D cog = getCenterOfGravity();
 			ip.setColor(Color.MAGENTA);
-			ip.drawString(""+getLabel(), cog.x, cog.y);
+			ip.drawString(""+getLabel(), (int)cog.getX(), (int)cog.getX());
 		}
 	}
 	
@@ -203,9 +210,9 @@ public class Blob {
 		}
 		
 		if((options&DRAW_LABEL)>0){
-			Point cog = getCenterOfGravity();
+			Point2D cog = getCenterOfGravity();
 			ip.setColor(Color.MAGENTA);
-			ip.drawString(""+getLabel(), cog.x, cog.y);
+			ip.drawString(""+getLabel(), (int)cog.getX(), (int)cog.getY());
 		}
 	}
 	
@@ -227,12 +234,12 @@ public class Blob {
 	 * holes.
 	 * @return Geometric center of gravity of the blob
 	 */
-	public Point getCenterOfGravity() {
+	public Point2D getCenterOfGravity() {
 		
 		if(centerOfGrafity != null){
 			return centerOfGrafity;
 		}
-		centerOfGrafity = new Point();
+		centerOfGrafity = new Point2D.Float();
 	    
 	    int[] x = outerContour.xpoints;
 	    int[] y = outerContour.ypoints;
@@ -247,12 +254,12 @@ public class Blob {
 	    	A = A + x[i]*y[i+1]-x[i+1]*y[i];
 	    }
 	    A = 0.5*A;
-	    centerOfGrafity.x = (int)(sumx/(6*A));
-		centerOfGrafity.y = (int)(sumy/(6*A));
+	    centerOfGrafity.setLocation((sumx/(6*A)),(sumy/(6*A)));
+		if(getEnclosedArea()==1){
+			centerOfGrafity.setLocation(x[0],y[0]);
+		}
 
 		return centerOfGrafity;
-		
-		
 	}
 	
 	/**
@@ -752,7 +759,6 @@ public class Blob {
 		}
 		areaConvexHull /= 2.0;
 		areaConvexHull = Math.abs(areaConvexHull);
-		IJ.log("A " +areaConvexHull );
 		return areaConvexHull;
 	}
 	
