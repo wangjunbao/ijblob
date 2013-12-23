@@ -47,6 +47,8 @@ class ConnectedComponentLabeler {
 	private int OBJECT = 0;
 	private ManyBlobs allBlobs;
 	private boolean removeBorder = false;
+	private int offSetX = 0;
+	private int offsetY = 0;
 	/*
 	 * 
 	 * The read-order of the neighberhood of p.
@@ -100,7 +102,7 @@ class ConnectedComponentLabeler {
 						labledImage.set(j, i, labelCount);
 						Polygon outerContour = traceContour(j, i, proc,
 								labelCount, 1);
-						outerContour.translate(-1, -1);
+						outerContour.translate(offSetX, offsetY);
 					
 						allBlobs.add(new Blob(outerContour, labelCount));
 						++labelCount;
@@ -117,7 +119,7 @@ class ConnectedComponentLabeler {
 						try{
 						Polygon innerContour = traceContour(j, i, proc, label,
 								2);
-						innerContour.translate(-1, -1);
+						innerContour.translate(offSetX, offsetY);
 						getBlobByLabel(label).addInnerContour(innerContour);
 						}catch(Exception e){
 						  
@@ -320,7 +322,8 @@ class ConnectedComponentLabeler {
 	}
 	
 	private void addWhiteBorder(ImagePlus img) {
-
+		offSetX=0;
+		offsetY=0;
 		boolean hasWhiteBorder = true;
 		ImageProcessor oldip = img.getProcessor();
 		ByteProcessor oldproc = (ByteProcessor) oldip;
@@ -353,6 +356,8 @@ class ConnectedComponentLabeler {
 		//hasWhiteBorder=false;
 		if (!hasWhiteBorder) 
 		{
+			offSetX=-1;
+			offsetY=-1;
 			removeBorder=true;
 			CanvasResizer resizer = new CanvasResizer();
 			Color oldbg = Toolbar.getBackgroundColor();
