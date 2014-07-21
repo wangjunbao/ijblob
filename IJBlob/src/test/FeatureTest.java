@@ -102,6 +102,18 @@ public class FeatureTest {
 	public void testGetElongation() {
 		fail("Not yet implemented");
 	}
+	
+	@Test
+	public void testGetMinimumBoundingRectangle() {
+		URL url = this.getClass().getResource("rotatedsquare2.tif");
+		ImagePlus ip = new ImagePlus(url.getPath());
+		ManyBlobs mb = new ManyBlobs(ip);
+		mb.findConnectedComponents();
+		mb.get(0).getMinimumBoundingRectangle();
+		IJ.log("LS " + mb.get(0).getLongSideMBR());
+		IJ.log("SS " + mb.get(0).getShortSideMBR());
+	}
+
 
 	@Test
 	public void testGetPerimeterCircleRad30() {

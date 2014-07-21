@@ -22,6 +22,7 @@ import ij.ImagePlus;
 import ij.gui.NewImage;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.measure.Calibration;
 import ij.process.ByteProcessor;
 import ij.process.EllipseFitter;
 import ij.process.ImageProcessor;
@@ -73,6 +74,7 @@ public class Blob {
 	private double convexity = -1;
 	private double solidity = -1;
 	private double areaConvexHull = -1;
+	private Calibration cal = new Calibration();
 	private double[][] centralMomentsLUT = {{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
 	private double[][] momentsLUT = {{-1,-1,-1},{-1,-1,-1},{-1,-1,-1}};
 	EllipseFitter fittedEllipse = null;
@@ -82,6 +84,22 @@ public class Blob {
 		this.outerContour = outerContour;
 		this.label = label;
 		innerContours = new ArrayList<Polygon>();
+	}
+	
+	/**
+	 * @param outerContour Contur of the blob
+	 * @param label Its unique label
+	 * @param cal The blob will use the image calibration
+	 */
+	public Blob(Polygon outerContour, int label, Calibration cal) {
+		this.outerContour = outerContour;
+		this.label = label;
+		innerContours = new ArrayList<Polygon>();
+		this.cal = cal;
+	}
+	
+	public void setCalibration(Calibration  cal){
+		this.cal = cal;
 	}
 	
 	public static void addCustomFeature(CustomBlobFeature feature) {
@@ -254,9 +272,10 @@ public class Blob {
 	    	A = A + x[i]*y[i+1]-x[i+1]*y[i];
 	    }
 	    A = 0.5*A;
-	    centerOfGrafity.setLocation((sumx/(6*A)),(sumy/(6*A)));
+	    
+	    centerOfGrafity.setLocation(cal.getX(sumx/(6*A)),cal.getY(sumy/(6*A)));
 		if(getEnclosedArea()==1){
-			centerOfGrafity.setLocation(x[0],y[0]);
+			centerOfGrafity.setLocation(cal.getX(x[0]),cal.getY(y[0]));
 		}
 
 		return centerOfGrafity;
@@ -267,12 +286,32 @@ public class Blob {
 	 */
 	public final static String GETFERETDIAMETER = "getFeretDiameter";
 	/**
-	 * Calculates the feret diameter of the outer contour using its chain code
+	 * Calculates the feret diameter of the outer contour
 	 * @return The feret diameter of the outer contour.
 	 */
 	public double getFeretDiameter() {
 		PolygonRoi proi = new PolygonRoi(outerContour, PolygonRoi.POLYLINE);
+		ImagePlus imp = new ImagePlus();
+		imp.setCalibration(cal);
+		proi.setImage(imp);
+		
 		return proi.getFeretsDiameter();
+	}
+	
+	/**
+	 * Method name of getMinFeretDiameter (for filtering).
+	 */
+	public final static String GETMINFERETDIAMETER = "getMinFeretDiameter";
+	/**
+	 * Calculates the min feret diameter of the outer contour
+	 * @return The feret diameter of the outer contour.
+	 */
+	public double getMinFeretDiameter() {
+		PolygonRoi proi = new PolygonRoi(outerContour, PolygonRoi.POLYLINE);
+		ImagePlus imp = new ImagePlus();
+		imp.setCalibration(cal);
+		proi.setImage(imp);
+		return proi.getFeretValues()[2];
 	}
 	
 	/**
@@ -295,7 +334,7 @@ public class Blob {
 			for(int y = bounds.y; y < bounds.y+bounds.height+1;y++){
 
 				if(outerContour.contains((double)x,(double)y)){
-					moment += Math.pow(x, p) * Math.pow(y, q);
+					moment += Math.pow(cal.getX(x), p) * Math.pow(cal.getY(y), q);
 				}
 			} 
 		}
@@ -349,7 +388,7 @@ public class Blob {
 			for(int x = bounds.x; x < bounds.x+bounds.width;x++){
 				for(int y = bounds.y; y < bounds.y+bounds.height;y++){
 					if(outerContour.contains(x, y)){
-						centralMoment += Math.pow(x-xc, p) * Math.pow(y-yc, q);
+						centralMoment += Math.pow(cal.getX(x)-xc, p) * Math.pow(cal.getY(y)-yc, q);
 					}
 				} 
 			}
@@ -370,7 +409,6 @@ public class Blob {
 		}
 		fitEllipse();
 		orientation = fittedEllipse.angle; 
-		Roi roi = new Roi(getOuterContour().getBounds());
 		
 		return orientation;
 	}
@@ -451,6 +489,74 @@ public class Blob {
 		elongation = Math.sqrt(elongation);
 
 		return elongation;
+	}
+	
+	public Point[] getMinimumBoundingRectangle(){
+		int[] xp = new int[getOuterContour().npoints];
+		int[] yp = new int[getOuterContour().npoints];
+		for(int i = 0; i < getOuterContour().npoints; i++){
+			xp[i] = getOuterContour().xpoints[i];
+			yp[i] = getOuterContour().ypoints[i];
+		}
+		
+		Point2D.Double[] mbr = RotatingCalipers.getMinimumBoundingRectangle(xp, yp);
+		Point[] p = new Point[4];
+		for(int i = 0; i < mbr.length; i++){
+			//IJ.log("i " + i);
+			p[i] = new Point();
+			p[i].x = (int)mbr[i].x;
+			p[i].y = (int)mbr[i].y;
+		}
+		return p;
+		
+	}
+	
+	/**
+	 * Method name of getLongSideMBR (for filtering).
+	 */
+	public final static String GETLONGSIDEMBR = "getLongSideMBR";
+	
+	/**
+	 * @return The long side length of the minimum enclosing rectangle
+	 */
+	public double getLongSideMBR(){
+		Point[] mbr = getMinimumBoundingRectangle();
+		
+		double firstSide = Math.sqrt(Math.pow(cal.getX(mbr[1].x) -cal.getX(mbr[0].x),2)+Math.pow(cal.getY(mbr[1].y) - cal.getY(mbr[0].y),2));
+		double secondSide = Math.sqrt(Math.pow(cal.getX(mbr[1].x) -cal.getX(mbr[2].x),2)+Math.pow(cal.getY(mbr[1].y) -cal.getY(mbr[2].y),2));
+		
+		return firstSide>secondSide?firstSide:secondSide;
+	}
+	
+	/**
+	 * Method name of getLongSideMBR (for filtering).
+	 */
+	public final static String GETSHORTSIDEMBR = "getShortSideMBR";
+	
+	/**
+	 * @return The short side length of the minimum enclosing rectangle
+	 */
+	public double getShortSideMBR(){
+		Point[] mbr = getMinimumBoundingRectangle();
+
+		double firstSide = Math.sqrt(Math.pow(cal.getX(mbr[1].x) -cal.getX(mbr[0].x),2)+Math.pow(cal.getY(mbr[1].y) - cal.getY(mbr[0].y),2));
+		double secondSide = Math.sqrt(Math.pow(cal.getX(mbr[1].x) -cal.getX(mbr[2].x),2)+Math.pow(cal.getY(mbr[1].y) -cal.getY(mbr[2].y),2));
+		
+		return firstSide<secondSide?firstSide:secondSide;
+	}
+	
+	/**
+	 * Method name of getLongSideMBR (for filtering).
+	 */
+	public final static String GETASPECTRATIO = "getAspectRatio";
+	
+	/**
+	 * @return The aspect ratio of the minimum enclosing rectangle
+	 */
+	public double getAspectRatio(){
+		
+		
+		return getLongSideMBR()/getShortSideMBR();
 	}
 	
 	private void fitEllipse(){
@@ -544,6 +650,7 @@ public class Blob {
 	
 	private double getPerimeterOfContour(Polygon contour){
 		double peri = 0;
+		/*
 		if(contour.npoints == 1)
 		{
 			peri=1;
@@ -556,8 +663,15 @@ public class Blob {
 				sum_gerade++;
 			}
 		}
+		
 		peri = sum_gerade*0.948 + (cc.length-sum_gerade)*1.340;
-		return peri;
+		*/
+		PolygonRoi roi = new PolygonRoi(outerContour, Roi.POLYGON);
+		ImagePlus dummy = new ImagePlus();
+		dummy.setCalibration(cal);
+		roi.setImage(dummy);
+
+		return roi.getLength();
 	}
 	
 	private int[] contourToChainCode(Polygon contour) {
@@ -614,6 +728,9 @@ public class Blob {
 		perimeterConvexHull = 0;
 		try {
 		convexRoi = new PolygonRoi(hull, Roi.POLYGON);
+		ImagePlus dummy = new ImagePlus();
+		dummy.setCalibration(cal);
+		convexRoi.setImage(dummy);
 		perimeterConvexHull = convexRoi.getLength();
 		}catch(Exception e){
 			perimeterConvexHull = getPerimeter();
@@ -732,7 +849,7 @@ public class Blob {
 			return enclosedArea;
 		}
 		int[] cc = contourToChainCode(getOuterContour());
-		enclosedArea = getAreaOfChainCode(cc);
+		enclosedArea = getAreaOfChainCode(cc)*cal.pixelHeight*cal.pixelWidth;
 		return enclosedArea;
 	}
 	
@@ -758,7 +875,7 @@ public class Blob {
 			areaConvexHull -= polyPoints.xpoints[j] * polyPoints.ypoints[i];
 		}
 		areaConvexHull /= 2.0;
-		areaConvexHull = Math.abs(areaConvexHull);
+		areaConvexHull = Math.abs(areaConvexHull)*cal.pixelHeight*cal.pixelWidth;;
 		return areaConvexHull;
 	}
 	

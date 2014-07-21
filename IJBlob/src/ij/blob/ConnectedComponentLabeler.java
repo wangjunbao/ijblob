@@ -19,8 +19,8 @@ package ij.blob;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.Prefs;
 import ij.gui.Toolbar;
+import ij.measure.Calibration;
 import ij.plugin.CanvasResizer;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
@@ -36,13 +36,14 @@ import java.util.Arrays;
 /**
  * Does Connected Component Labeling 
  * @author Thorsten Wagner
+ * 
  */
 class ConnectedComponentLabeler {
 	
 	private ImagePlus imp;
 	private ImageProcessor labledImage;
 	private int NOLABEL = 0;
-	private int labelCount = 100;
+	private int labelCount = 1;
 	private int BACKGROUND = 255;
 	private int OBJECT = 0;
 	private ManyBlobs allBlobs;
@@ -83,6 +84,7 @@ class ConnectedComponentLabeler {
 	public void doConnectedComponents() {
 		
 		ImageProcessor ip = imp.getProcessor();
+		Calibration c = imp.getCalibration();
 
 		ByteProcessor proc = (ByteProcessor) ip;
 		byte[] pixels = (byte[]) proc.getPixels();
@@ -104,7 +106,7 @@ class ConnectedComponentLabeler {
 								labelCount, 1);
 						outerContour.translate(offSetX, offsetY);
 					
-						allBlobs.add(new Blob(outerContour, labelCount));
+						allBlobs.add(new Blob(outerContour, labelCount,c));
 						++labelCount;
 
 					}
@@ -141,6 +143,7 @@ class ConnectedComponentLabeler {
 		//printImage(labledImage);
 	}
 	
+	@SuppressWarnings("unused")
 	private void printImage(ImageProcessor img){
 		System.out.println("=================");
 		ImageProcessor proc = img;
@@ -178,8 +181,13 @@ class ConnectedComponentLabeler {
 				}
 			}
 		}
+		if(removeBorder){
+			removeBorder(img);
+		}
 		return img;
 	}
+	
+	
 
 	private Polygon traceContour(int x, int y, ByteProcessor proc, int label,
 			int start) {

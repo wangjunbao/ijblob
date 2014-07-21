@@ -21,6 +21,7 @@ package ij.blob;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.NewImage;
+import ij.plugin.NextImageOpener;
 import ij.process.ColorProcessor;
 import ij.process.ImageStatistics;
 
@@ -152,6 +153,15 @@ public class ManyBlobs extends ArrayList<Blob> {
 	public Blob getSpecificBlob(Point p){
 		   return getSpecificBlob(p.x,p.y);
 	}
+	
+	public Blob getBlobByLabel(int id){
+		for (Blob b : this) {
+			if(b.getLabel()==id){
+				return b;
+			}
+		}
+		return null;
+	}
 
 	
 	/**
@@ -202,8 +212,11 @@ public class ManyBlobs extends ArrayList<Blob> {
 					if(methodIsCustom){break;}
 				}
 			}
-			
+
 			for(int i = 0; i < this.size(); i++) {
+				if(this.get(i).getOuterContour().npoints< 4){
+					continue;
+				}
 				double value = 0;
 				Object methodvalue = null;
 				if(methodInBuild){
@@ -213,6 +226,7 @@ public class ManyBlobs extends ArrayList<Blob> {
 					methodvalue =  m.invoke((Blob.customFeatures.get(featureIndex)), methodparams);
 				}
 				else{
+		
 					throw new NoSuchMethodException("The method " + methodName + " was not found");
 				}
 
@@ -226,6 +240,7 @@ public class ManyBlobs extends ArrayList<Blob> {
 				else {
 					IJ.log("Return type not supported");
 				}
+	
 				boolean included= false;
 				
 				if (Double.isNaN(value)){
@@ -240,21 +255,31 @@ public class ManyBlobs extends ArrayList<Blob> {
 				}
 				if(included){
 					blobs.add(this.get(i));
+				//	IJ.log("ADD");
+					
+				}else{
+					//IJ.log("NOT INC " + methodName + " v " + value);
 				}
 			}
 		} catch (NoSuchMethodException e) {
 			IJ.log("Method not found: " + e.getMessage());
 			e.printStackTrace();
 		} catch (SecurityException e) {
+			IJ.log(e.getMessage());
+		
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
+			IJ.log(e.getMessage());
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
+			IJ.log(e.getMessage());
 			throw new IllegalArgumentException("Method " + methodName + " was called with wrong types of parameters");
 		} catch (InvocationTargetException e) {
+			IJ.log(e.getMessage());
 			e.printStackTrace();
 		}
 		blobs.setLabeledImage(generateLabeledImageFromBlobs(blobs));
+	//	IJ.log("Blobs Nachher " + blobs.size());
 		return blobs;
 		
 	}
