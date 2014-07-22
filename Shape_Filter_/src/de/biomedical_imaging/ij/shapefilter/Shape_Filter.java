@@ -207,11 +207,6 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 			 
 			 
 		}
-		if( IJ.getTextPanel().getMouseListeners().length == 0){
-		//IJ.getTextPanel().addMouseListener(new ResultsTableMouseListener());
-			
-		}
-	
 		
 		ManyBlobs fb = getFilteredBlobs(params);
 		for (int i = 0; i < fb.size(); i++) {
