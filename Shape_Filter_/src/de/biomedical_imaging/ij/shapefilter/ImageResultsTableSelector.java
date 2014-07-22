@@ -13,7 +13,9 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-
+/**
+ * This class implements an listener for interactive select a blob in an image and the corresponding row in the results table.
+ **/
 public class ImageResultsTableSelector implements MouseListener {
 	
 	private ImagePlus imp;

@@ -45,31 +45,18 @@ import java.util.Map.Entry;
  */
 public class Shape_Filter implements ExtendedPlugInFilter {
 	/*
-	 * Dieses Plugin filtert binäre Objekte nach ihren Formparametern. Ob die
-	 * einzelnen Objekte zu identifizieren und deren Kontur zu extrahieren,
-	 * wurde folgende Algorithmus implementiert: ���F. Chang, ���A linear-time
-	 * component-labeling algorithm using contour tracing technique,��� Computer
-	 * Vision and Image Understanding, vol. 93, no. 2, pp. 206-220, 2004.
+	 * This plugin filters binary objects using shape parameters.
+	 * Needs ImageJ 1.47h 
 	 */
 
 	private ImagePlus imp;
-	private ManyBlobs[] allBlobs;
-	private ImageProcessor actualIP;
+	private ManyBlobs[] allBlobs; 	//For each slice one ManyBlobs object
+	private ImageProcessor currentIP;
 	private FilterParameters para;
 	private ResultsTable rt;
 	boolean processStack;
 	boolean previewIsActive = false;
 	private static Shape_Filter instance = null;
-	
-	/*
-	 * Die Reihenfolge, wie das 3x3 Fester um den Punkt p durchlaufen wird.
-	 * Fenster:
-	 * 5 * 6 * 7 
-	 * 4 * p * 0 
-	 * 3 * 2 * 1 
-	 */
-	int iterationorder[] = { 5, 4, 3, 6, 2, 7, 0, 1 };
-    //Needs ImageJ 1.47h 
 	
 	public Shape_Filter() {
 		// TODO Auto-generated constructor stub
@@ -78,6 +65,7 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 	
 	@Override
 	public int setup(String arg, ImagePlus imp) {
+		
 		if (imp == null || imp.getType() != ImagePlus.GRAY8) {
 			IJ.error("Binary Image is needed!");
 			return DONE;
@@ -97,22 +85,47 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 		}
 		
 		this.imp = imp;
-		allBlobs = new ManyBlobs[imp.getStackSize()];//(imp);
 
-		IJ.showStatus("Do Component Labeling");
+		allBlobs = new ManyBlobs[imp.getStackSize()];
 		
 		registerImage(imp.getTitle());
 		
 		return DOES_8G;
 	}
 	
-	public void setIsPreview(boolean ispreview){
-		this.previewIsActive = ispreview;
+	@Override
+	public void run(ImageProcessor ip) {
+		currentIP = ip;
+		
+		ImagePlus helpimp = new ImagePlus("", ip);
+		helpimp.setCalibration(imp.getCalibration());
+		allBlobs[currentIP.getSliceNumber()-1] = new ManyBlobs(helpimp);
+		if(para.isBlackBackground()){
+			allBlobs[currentIP.getSliceNumber()-1].setBackground(0);
+		}
+		else{
+			allBlobs[currentIP.getSliceNumber()-1].setBackground(1);
+		}
+		allBlobs[currentIP.getSliceNumber()-1].findConnectedComponents();
+		IJ.showStatus("Component Labeling Done");
+		
+		addResultImage(para);
+		if (para.isAddToManager() && previewIsActive==false) {
+			addToManager(para);
+		}
+		
+		if(para.isFillResultsTable()&& previewIsActive==false){
+			fillResultTable(para);
+		}
+		
+		if(para.isShowLabeledImage()&& previewIsActive==false){
+			ManyBlobs fb = getFilteredBlobs(para);
+			fb.getLabeledImage().show();
+		}
+		
 	}
 	
-	public void setParameters(FilterParameters para){
-		this.para = para;
-	}
+	
 	@Override
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
 		BlobFilterDialog dialog = new BlobFilterDialog();
@@ -139,8 +152,11 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 		
 	}
 
-	
-	public void registerImage(String title){
+	/**
+	 * Adds an ImageResultsTableSelector-Listener for the image with the name "title"
+	 * @param title window name
+	 */
+	private void registerImage(String title){
 		Window window = WindowManager.getWindow(title);
 		ImagePlus image = WindowManager.getImage(title);
 		boolean windowIsVisible = (window!=null);
@@ -153,45 +169,24 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 		return instance;
 	}
  
+	/**
+	 * @return An array with ijblob manyblobs objects (for each slice one)
+	 */
 	public ManyBlobs[] getAllBlobs(){
 		return allBlobs;
 	}
 	
+	/**
+	 * 
+	 * @param frame
+	 * @param label
+	 * @return a blob with label 'label' in frame with index 'frame'
+	 */
 	public Blob getBlobByFrameAndLabel(int frame, int label){
 		return allBlobs[frame].getBlobByLabel(label);
 	}
 
-	@Override
-	public void run(ImageProcessor ip) {
-		actualIP = ip;
-		
-		ImagePlus helpimp = new ImagePlus("", ip);
-		helpimp.setCalibration(imp.getCalibration());
-		allBlobs[actualIP.getSliceNumber()-1] = new ManyBlobs(helpimp);
-		if(para.isBlackBackground()){
-			allBlobs[actualIP.getSliceNumber()-1].setBackground(0);
-		}
-		else{
-			allBlobs[actualIP.getSliceNumber()-1].setBackground(1);
-		}
-		allBlobs[actualIP.getSliceNumber()-1].findConnectedComponents();
-		IJ.showStatus("Component Labeling Done");
-		
-		addResultImage(para, ip);
-		if (para.isAddToManager() && previewIsActive==false) {
-			addToManager(para);
-		}
-		
-		if(para.isFillResultsTable()&& previewIsActive==false){
-			fillResultTable(para);
-		}
-		
-		if(para.isShowLabeledImage()&& previewIsActive==false){
-			ManyBlobs fb = getFilteredBlobs(para);
-			fb.getLabeledImage().show();
-		}
-		
-	}
+	
 	
 	/**
 	 * Fügt für alle Blobs, dessen Formparameter innerhalb der Schwellwerte liegen, die ermittelten Formparamter
@@ -221,7 +216,7 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 		ManyBlobs fb = getFilteredBlobs(params);
 		for (int i = 0; i < fb.size(); i++) {
 				rt.incrementCounter();
-				rt.addValue("Frame", processStack?actualIP.getSliceNumber():imp.getCurrentSlice());
+				rt.addValue("Frame", processStack?currentIP.getSliceNumber():imp.getCurrentSlice());
 				rt.addValue("Label", fb.get(i).getLabel());
 				Point2D cog = fb.get(i).getCenterOfGravity();
 				rt.addValue("X", cog.getX());
@@ -256,26 +251,23 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 		rt.show("Results");
 	}
 	
-	/**
-	 * Erstellt einen Plot, der alle Blobs enth��lt, die innerhalb der Schwellwerte params liegen.
-	 * @param params Schwellwerte der Formparamter
-	 */
-	private void addResultImage(FilterParameters params, ImageProcessor ip) {
+	
+	private void addResultImage(FilterParameters params) {
 		ManyBlobs fb = getFilteredBlobs(params);
 		if(params.isBlackBackground()){
-			actualIP.setColor(Color.black);
+			currentIP.setColor(Color.black);
 			Blob.setDefaultColor(Color.white);
 		}
 		else
 		{
-			actualIP.setColor(Color.white);
+			currentIP.setColor(Color.white);
 			Blob.setDefaultColor(Color.black);
 		}
-		actualIP.fill();
+		currentIP.fill();
 		for (int i = 0; i < fb.size(); i++) {
 			IJ.showStatus("Feature Calculation");
 			IJ.showProgress(i + 1, fb.size());
-			fb.get(i).draw(actualIP, params.isDrawHoles() | params.isDrawConvexHull() | params.isDrawLabel());
+			fb.get(i).draw(currentIP, params.isDrawHoles() | params.isDrawConvexHull() | params.isDrawLabel());
 		}
 	}
 	
@@ -312,13 +304,29 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 		Iterator<Entry<String, double[]>> it = params.getFeatureIterator();
 		Entry<String, double[]> pairs = it.next();
 	
-		fb = allBlobs[actualIP.getSliceNumber()-1].filterBlobs((double[])pairs.getValue(), pairs.getKey(),params.getFilterMethodParameter(pairs.getKey()));
+		fb = allBlobs[currentIP.getSliceNumber()-1].filterBlobs((double[])pairs.getValue(), pairs.getKey(),params.getFilterMethodParameter(pairs.getKey()));
 		while(it.hasNext()) {
 			pairs = it.next();
 			fb = fb.filterBlobs((double[])pairs.getValue(), pairs.getKey(),params.getFilterMethodParameter(pairs.getKey()));
 		}
 		return fb;
 		
+	}
+	
+	/**
+	 * Sets the the preview mode property.
+	 * @param ispreview true, if the preview mode is active
+	 */
+	public void setIsPreview(boolean ispreview){
+		this.previewIsActive = ispreview;
+	}
+	
+	/**
+	 * Sets the used shape parameter configuration
+	 * @param parameter configuration
+	 */
+	public void setParameters(FilterParameters para){
+		this.para = para;
 	}
 
 	

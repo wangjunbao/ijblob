@@ -12,7 +12,9 @@ import java.awt.Point;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-
+/**
+ * This class implements an listener for interactive select a row in the results table and the corresponding blob in an image.
+ **/
 public class ResultsTableSelectionDrawer implements MouseListener {
 	
 	public int selectionStart = -1;
