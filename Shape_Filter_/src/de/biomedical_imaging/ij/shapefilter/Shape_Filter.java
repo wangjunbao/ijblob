@@ -25,6 +25,7 @@ import java.awt.Window;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.WindowManager;
 import ij.blob.Blob;
 import ij.blob.ManyBlobs;
@@ -35,9 +36,12 @@ import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
 import ij.plugin.frame.RoiManager;
+import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
+
 import java.awt.geom.Point2D;
+import java.awt.image.ColorModel;
 import java.util.Iterator;
 import java.util.Map.Entry;
 /*
@@ -50,6 +54,7 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 	 */
 
 	private ImagePlus imp;
+	private ImageStack labeledImageStack;
 	private ManyBlobs[] allBlobs; 	//For each slice one ManyBlobs object
 	private ImageProcessor currentIP;
 	private FilterParameters para;
@@ -59,7 +64,6 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 	private static Shape_Filter instance = null;
 	
 	public Shape_Filter() {
-		// TODO Auto-generated constructor stub
 		instance=this;
 	}
 	
@@ -85,6 +89,7 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 		}
 		
 		this.imp = imp;
+		labeledImageStack = new ImageStack(imp.getWidth(), imp.getHeight());
 
 		allBlobs = new ManyBlobs[imp.getStackSize()];
 		
@@ -100,6 +105,8 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 		ImagePlus helpimp = new ImagePlus("", ip);
 		helpimp.setCalibration(imp.getCalibration());
 		allBlobs[currentIP.getSliceNumber()-1] = new ManyBlobs(helpimp);
+		
+		//Set the background color used by Center Method blob and maximum
 		if(para.isBlackBackground()){
 			allBlobs[currentIP.getSliceNumber()-1].setBackground(0);
 		}
@@ -109,7 +116,8 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 		allBlobs[currentIP.getSliceNumber()-1].findConnectedComponents();
 		IJ.showStatus("Component Labeling Done");
 		
-		addResultImage(para);
+		calculateResultImage(para);
+		
 		if (para.isAddToManager() && previewIsActive==false) {
 			addToManager(para);
 		}
@@ -120,7 +128,13 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 		
 		if(para.isShowLabeledImage()&& previewIsActive==false){
 			ManyBlobs fb = getFilteredBlobs(para);
-			fb.getLabeledImage().show();
+			labeledImageStack.addSlice(fb.getLabeledImage().getProcessor());
+		
+			if(currentIP.getSliceNumber()==imp.getStackSize()){
+				ImagePlus help = new ImagePlus("Labeled Image");
+				help.setStack(labeledImageStack);
+				help.show();
+			}
 		}
 		
 	}
@@ -194,18 +208,12 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 	 * @param params Schwellwerte der Formparamter
 	 */
 	private void fillResultTable(FilterParameters params) {
-		// TODO Auto-generated method stub
 		rt = Analyzer.getResultsTable();
 
 		if(rt==null)
 		{
-			IJ.log("new");
-			 rt = new ResultsTable();
-			
-			
+			 rt = new ResultsTable();	
 			 Analyzer.setResultsTable(rt);
-			 
-			 
 		}
 		
 		ManyBlobs fb = getFilteredBlobs(params);
@@ -247,7 +255,7 @@ public class Shape_Filter implements ExtendedPlugInFilter {
 	}
 	
 	
-	private void addResultImage(FilterParameters params) {
+	private void calculateResultImage(FilterParameters params) {
 		ManyBlobs fb = getFilteredBlobs(params);
 		if(params.isBlackBackground()){
 			currentIP.setColor(Color.black);

@@ -35,6 +35,12 @@ class BlobFilterDialog implements DialogListener {
 	
 	String DEFAULT_ZERO_INFINITY = "0-Infinity";
 	String DEFAULT_ZERO_ONE = "0-1";
+	
+	/**
+	 * shows the gui
+	 * @param pfr
+	 * @return -1 if canceled, 1 if not
+	 */
 	int showDialog(PlugInFilterRunner pfr) {
 		
 		GenericDialog gd = new GenericDialog("Shape Filter");
@@ -93,7 +99,7 @@ class BlobFilterDialog implements DialogListener {
 		return true;
 	}
 	
-	public void updateParams(GenericDialog gd){
+	private void updateParams(GenericDialog gd){
 		params = new FilterParameters();
 		params.addFilter(Blob.GETENCLOSEDAREA, stringIntervalToArray(gd.getNextString(),DEFAULT_ZERO_INFINITY));
 		params.addFilter(Blob.GETAREACONVEXHULL , stringIntervalToArray(gd.getNextString(),DEFAULT_ZERO_INFINITY));
@@ -123,6 +129,10 @@ class BlobFilterDialog implements DialogListener {
 		params.setFillResultsTable(gd.getNextBoolean());
 	}
 	
+	/**
+	 * converts a tab oder ',' delimited string of numbers to a interger array
+	 * @param s String of numbers delimited by ',' oder tab
+	 */
 	public int[] s2ints(String s) {
 		StringTokenizer st = new StringTokenizer(s, ", \t");
 		int nInts = st.countTokens();
@@ -137,7 +147,13 @@ class BlobFilterDialog implements DialogListener {
 	public FilterParameters getParams() {
 		return params;
 	}
-
+	
+	/**
+	 * Splits an interval x-y (only - delimiter is supported)
+	 * @param s Interval as string
+	 * @param defaultvalue Return value if the splitting fails.
+	 * @return [0] lower bound, [1] upper bound
+	 */
 	private double[] stringIntervalToArray(String s, String defaultvalue){
 		double[] bounds = new double[2];
 		String lim[] = s.split("-");
